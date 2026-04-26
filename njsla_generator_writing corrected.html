@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NJSLA Grade 3 ELA — Practice Exam Generator</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:#eef2fb;min-height:100vh}
+.hidden{display:none!important}
+button{font-family:inherit}
+
+/* ── HEADER ── */
+#hdr{background:#003087;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 20px;border-bottom:3px solid #f0c040;position:sticky;top:0;z-index:100;height:52px;flex-shrink:0}
+.hdr-left{display:flex;align-items:center;gap:12px}
+.nj-badge{background:#fff;color:#003087;font-weight:900;font-size:13px;padding:3px 8px;border-radius:3px;letter-spacing:1px;flex-shrink:0}
+.hdr-titles .ht1{font-size:12px;font-weight:700;letter-spacing:.4px}
+.hdr-titles .ht2{font-size:10px;opacity:.8}
+.hdr-right{display:flex;align-items:center;gap:8px}
+.hdr-tool{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:5px;padding:4px 10px;font-size:11px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:4px}
+.hdr-tool.on{background:#f0c040;color:#003087}
+#timer-box{background:rgba(255,255,255,.15);border:2px solid rgba(255,255,255,.4);border-radius:7px;padding:4px 14px;font-family:'Courier New',monospace;font-size:17px;font-weight:700;letter-spacing:2px;color:#fff;min-width:88px;text-align:center}
+#timer-box.warn{background:#7f1d1d;border-color:#fca5a5;animation:pulse .8s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.7}}
+
+/* ── NOTEPAD ── */
+#notepad-float{position:fixed;right:16px;top:60px;width:290px;background:#fff;border:2px solid #003087;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,80,.25);z-index:300;display:flex;flex-direction:column}
+.np-hdr{background:#003087;color:#fff;padding:8px 14px;border-radius:8px 8px 0 0;display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:700}
+.np-hdr button{background:none;border:none;color:#fff;font-size:18px;cursor:pointer;line-height:1;padding:0 2px}
+#notepad-text{width:100%;height:190px;padding:10px;border:none;border-radius:0 0 8px 8px;resize:none;font-family:Georgia,serif;font-size:13px;line-height:1.65;outline:none}
+
+/* ── ZOOM OVERLAY ── */
+#zoom-ctrl{position:fixed;bottom:20px;left:20px;background:#003087;color:#fff;border-radius:8px;padding:6px 10px;display:flex;align-items:center;gap:8px;font-size:12px;z-index:300;box-shadow:0 4px 12px rgba(0,0,80,.3)}
+#zoom-ctrl button{background:rgba(255,255,255,.2);border:none;color:#fff;width:26px;height:26px;border-radius:4px;cursor:pointer;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+/* ── SCREENS ── */
+.screen{display:flex;flex-direction:column}
+.full-h{height:calc(100vh - 52px)}
+
+/* ── SELECTOR ── */
+#s-selector{min-height:100vh;background:linear-gradient(160deg,#001840 0%,#003087 55%,#0050c8 100%);padding:32px 20px}
+.sel-hdr{text-align:center;color:#fff;margin-bottom:32px}
+.sel-hdr h1{font-size:28px;font-weight:900;margin-bottom:6px}
+.sel-hdr p{font-size:14px;opacity:.85}
+.exam-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px;max-width:1000px;margin:0 auto}
+.exam-card{background:#fff;border-radius:14px;padding:24px;cursor:pointer;border:3px solid transparent;transition:all .2s;position:relative;overflow:hidden}
+.exam-card:hover{border-color:#f0c040;transform:translateY(-3px);box-shadow:0 12px 32px rgba(0,0,80,.25)}
+.exam-card .ec-num{position:absolute;top:16px;right:16px;width:36px;height:36px;border-radius:50%;background:#003087;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:15px}
+.exam-card .ec-topic{font-size:11px;color:#0050c8;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
+.exam-card .ec-title{font-size:18px;font-weight:800;color:#1e293b;margin-bottom:6px}
+.exam-card .ec-desc{font-size:13px;color:#64748b;line-height:1.5;margin-bottom:16px}
+.exam-card .ec-meta{display:flex;gap:10px;flex-wrap:wrap}
+.ec-tag{background:#f0f4ff;color:#003087;font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px}
+.ec-done{background:#f0fdf4;border-color:#86efac!important}
+.ec-done .ec-score{margin-top:10px;font-size:13px;font-weight:700;color:#166534}
+
+/* ── WELCOME ── */
+#s-welcome{min-height:calc(100vh - 52px);align-items:center;justify-content:center;padding:20px;background:linear-gradient(160deg,#001840 0%,#003087 60%,#0050c8 100%)}
+.welcome-box{background:#fff;border-radius:16px;padding:44px;max-width:700px;width:100%;box-shadow:0 20px 60px rgba(0,0,80,.4)}
+.wlc-hero{display:flex;align-items:center;gap:16px;margin-bottom:28px}
+.wlc-logo{width:56px;height:56px;background:#003087;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:22px;flex-shrink:0}
+.info-2col{background:#f0f6ff;border:1px solid #c8d8ea;border-radius:10px;padding:14px 18px;display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px;color:#444;margin-bottom:20px}
+.dir-ul{color:#4a5568;font-size:14px;line-height:2.1;padding-left:20px;margin-bottom:20px}
+.warn-strip{background:#fffbeb;border:1px solid #f0c040;border-radius:8px;padding:11px 16px;font-size:13px;color:#78350f;margin-bottom:24px}
+
+/* ── DIRECTION CARDS ── */
+#s-p1dir,#s-p2dir{min-height:calc(100vh - 52px);align-items:center;justify-content:center;background:#f5f8ff;padding:20px}
+.dir-card{background:#fff;border:2px solid #c8d8ea;border-radius:14px;padding:44px;max-width:620px;width:100%}
+.part-pill{display:inline-block;padding:5px 16px;border-radius:20px;font-size:11px;font-weight:700;color:#fff;margin-bottom:18px;letter-spacing:.5px}
+.pill-blue{background:#003087}
+.pill-green{background:#14532d}
+.prompt-highlight{background:#eff6ff;border:2px solid #003087;border-radius:10px;padding:16px 20px;margin:16px 0}
+.tip-strip{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:11px 16px;font-size:13px;color:#166534;margin-bottom:24px}
+
+/* ── QUESTION SCREEN ── */
+#q-nav-bar{background:#dce6f5;border-bottom:1px solid #b8c8e0;padding:7px 18px;display:flex;align-items:center;gap:8px;flex-shrink:0;flex-wrap:wrap}
+.q-dot{width:30px;height:30px;border-radius:50%;border:2px solid #9aaecc;background:#fff;color:#444;font-weight:700;font-size:12px;cursor:pointer;position:relative;flex-shrink:0;transition:all .15s}
+.q-dot.cur{background:#003087;border-color:#003087;color:#fff}
+.q-dot.ok{background:#dcfce7;border-color:#16a34a;color:#14532d}
+.q-dot.flag::after{content:'';position:absolute;top:-3px;right:-3px;width:10px;height:10px;background:#dc2626;border-radius:50%}
+.q-tools{margin-left:auto;display:flex;gap:6px;align-items:center}
+.q-tool-btn{background:#fff;border:1px solid #9aaecc;border-radius:5px;padding:4px 10px;font-size:11px;cursor:pointer;color:#444;font-weight:600}
+.q-tool-btn.active{background:#fef9c3;border-color:#ca8a04;color:#78350f}
+
+/* SPLIT PANE */
+#split{flex:1;display:flex;overflow:hidden}
+.l-pane{width:48%;border-right:2px solid #b8c8e0;overflow-y:auto;overflow-x:hidden;background:#fff;display:flex;flex-direction:column}
+.pane-hdr{background:#003087;color:#fff;padding:10px 20px;flex-shrink:0;position:sticky;top:0;z-index:10}
+.pane-hdr .ph-src{font-size:10px;opacity:.75;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:1px}
+.pane-hdr .ph-ttl{font-size:14px;font-weight:700}
+.pane-body{padding:18px 22px;flex:1}
+.pane-body p{line-height:1.88;margin-bottom:14px;color:#1e293b}
+.r-pane{flex:1;overflow-y:auto;background:#f7faff;padding:24px 26px}
+.q-label{background:#003087;color:#fff;display:inline-block;padding:3px 14px;border-radius:20px;font-size:11px;font-weight:700;margin-bottom:18px}
+.q-italic{font-size:13px;color:#64748b;font-style:italic;margin-bottom:8px}
+.q-quote-box{background:#fffbeb;border-left:4px solid #f0c040;border:1px solid #f0c040;border-radius:0 8px 8px 0;padding:10px 16px;margin-bottom:16px;font-size:15px;font-style:italic;color:#451a03}
+.q-stem{font-size:15px;font-weight:600;color:#1e293b;line-height:1.55;margin-bottom:22px}
+.choices{display:flex;flex-direction:column;gap:9px}
+.choice-btn{display:flex;align-items:flex-start;gap:11px;padding:12px 14px;border-radius:9px;border:2px solid #dde8f5;background:#fff;cursor:pointer;text-align:left;width:100%;transition:all .15s;position:relative}
+.choice-btn:hover:not(.sel):not(.elim){border-color:#93c5fd;background:#f0f7ff}
+.choice-btn.sel{border-color:#003087;background:#e8f0fe}
+.choice-btn.elim{opacity:.45;text-decoration:line-through}
+.choice-btn.elim::after{content:'✗';position:absolute;top:6px;right:8px;font-size:12px;color:#dc2626;font-weight:700}
+.choice-letter{width:27px;height:27px;border-radius:50%;border:2px solid #9aaecc;background:#fff;color:#444;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;margin-top:1px;transition:all .15s}
+.choice-btn.sel .choice-letter{background:#003087;border-color:#003087;color:#fff}
+.choice-text{font-size:14px;color:#1e293b;line-height:1.5;padding-top:3px}
+.choice-btn.sel .choice-text{color:#003087;font-weight:600}
+
+/* ── REVIEW SCREEN ── */
+#s-review{min-height:calc(100vh - 52px);background:#f5f8ff;padding:24px 20px;overflow-y:auto}
+.review-wrap{max-width:700px;margin:0 auto}
+.rev-q{display:flex;align-items:flex-start;gap:12px;background:#fff;border:1px solid #dde8f5;border-radius:10px;padding:14px 16px;margin-bottom:10px;cursor:pointer}
+.rev-q:hover{border-color:#003087}
+.rev-q .rq-num{width:32px;height:32px;border-radius:50%;background:#003087;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0}
+.rev-q.answered .rq-num{background:#166534}
+.rev-q.flagged-q .rq-num{background:#dc2626}
+.rq-body{flex:1}
+.rq-status{font-size:12px;font-weight:700;margin-top:4px}
+.rq-status.ok{color:#166534}
+.rq-status.na{color:#dc2626}
+.rq-status.fl{color:#d97706}
+
+/* ── WRITING SCREEN ── */
+#src-tabs{background:#dce6f5;border-bottom:1px solid #b8c8e0;padding:0 18px;display:flex;align-items:flex-end;gap:3px;flex-shrink:0}
+.stab{padding:8px 14px;border:1px solid #b8c8e0;border-bottom:none;border-radius:7px 7px 0 0;background:#ccd9ed;color:#445;font-weight:500;font-size:12px;cursor:pointer;margin-bottom:-1px;transition:all .15s}
+.stab.on{background:#fff;border-color:#003087;color:#003087;font-weight:700}
+.ref-src-label{font-size:9px;opacity:.75;letter-spacing:1.2px;text-transform:uppercase}
+.ref-ttl{font-size:13px;font-weight:700}
+.pbar{background:#eff6ff;border-bottom:1px solid #b8c8e0;padding:9px 18px;font-size:12px;color:#003087;flex-shrink:0}
+#toolbar{background:#f0f4f8;border-bottom:1px solid #dce6f5;padding:5px 14px;display:flex;align-items:center;gap:5px;flex-shrink:0;flex-wrap:wrap}
+.tb-btn{background:#fff;border:1px solid #b8c8e0;border-radius:4px;padding:3px 9px;font-size:11px;cursor:pointer;color:#334;font-weight:500}
+#wc-pill{margin-left:auto;border-radius:6px;padding:3px 10px;font-size:12px;font-weight:700}
+#wc-pill.low{background:#fffbeb;border:1px solid #f0c040;color:#92400e}
+#wc-pill.ok{background:#f0fdf4;border:1px solid #86efac;color:#14532d}
+#essay{flex:1;padding:20px 24px;border:none;outline:none;resize:none;font-family:Georgia,'Times New Roman',serif;font-size:15px;line-height:2.08;color:#1e293b;background:#fff;background-image:repeating-linear-gradient(transparent,transparent 31px,#cdd8e8 31px,#cdd8e8 32px);background-attachment:local}
+
+/* ── BOTTOM BAR ── */
+.btm-bar{background:#e8eef8;border-top:2px solid #b8c8e0;padding:9px 20px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.btm-bar .ctr{font-size:12px;color:#555;text-align:center}
+
+/* ── CONFIRM DIALOG ── */
+#s-confirm{min-height:calc(100vh - 52px);display:flex;align-items:center;justify-content:center;background:rgba(0,24,64,.6)}
+.confirm-card{background:#fff;border-radius:14px;padding:40px;max-width:480px;width:90%;text-align:center}
+
+/* ── REPORT ── */
+#s-report{background:#eef2fb;min-height:calc(100vh - 52px);padding:20px}
+.rpt-wrap{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+.rpt-banner{background:#003087;color:#fff;border-radius:14px;padding:16px 26px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.rpt-stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.rpt-stat{background:#fff;border:1px solid #c8d8ea;border-radius:12px;padding:16px 18px;text-align:center}
+.rpt-stat .rs-lbl{font-size:10px;color:#888;font-weight:700;letter-spacing:.8px;text-transform:uppercase;margin-bottom:5px}
+.rpt-stat .rs-val{font-size:26px;font-weight:900;line-height:1}
+.rpt-stat .rs-sub{font-size:11px;color:#666;margin-top:5px}
+.rpt-card{background:#fff;border:1px solid #c8d8ea;border-radius:12px;padding:20px 24px}
+.rpt-card-title{font-weight:700;color:#003087;font-size:14px;padding-bottom:10px;margin-bottom:14px;border-bottom:2px solid #e5edfa}
+.ans-item{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:8px;margin-bottom:8px;border:1px solid}
+.ans-item.cr{background:#f0fdf4;border-color:#86efac}
+.ans-item.wr{background:#fff1f2;border-color:#fca5a5}
+.ans-item.sk{background:#f8fafc;border-color:#e2e8f0}
+.ans-num{width:24px;height:24px;border-radius:50%;background:#003087;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px}
+.lvl-badge{border-radius:10px;padding:12px 18px;display:flex;align-items:center;justify-content:space-between;border-width:2px;border-style:solid;margin-bottom:18px}
+.score-bar-wrap{display:flex;align-items:center;gap:10px;margin:6px 0 2px}
+.sbar-bg{flex:1;height:10px;background:#e2e8f0;border-radius:99px;overflow:hidden}
+.sbar-fill{height:100%;border-radius:99px;transition:width .9s ease}
+.dim-block{background:#f7faff;border:1px solid #dde8f5;border-radius:10px;padding:13px 16px;margin-bottom:12px}
+.dim-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.dim-fbk{font-size:12px;color:#334;line-height:1.6;border-top:1px solid #dde8f5;padding-top:8px;margin-top:4px}
+.sg-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.sg-box{border-radius:10px;padding:13px 15px;border:1px solid}
+.sg-title{font-weight:700;font-size:12px;margin-bottom:8px}
+.sg-item{display:flex;gap:7px;font-size:12px;margin-bottom:5px;line-height:1.45}
+.overall-box{background:#eff6ff;border:1px solid #93c5fd;border-radius:10px;padding:13px 16px}
+.print-btn{background:#003087;color:#fff;border:none;border-radius:8px;padding:10px 22px;font-size:13px;font-weight:700;cursor:pointer;margin-right:10px}
+.loading-area{text-align:center;padding:28px 0}
+.ld-dots{display:flex;justify-content:center;gap:6px;margin-top:14px}
+.ld-dot{width:8px;height:8px;border-radius:50%;background:#003087;animation:blink 1.2s infinite}
+.ld-dot:nth-child(2){animation-delay:.4s}
+.ld-dot:nth-child(3){animation-delay:.8s}
+@keyframes blink{0%,100%{opacity:.25}40%{opacity:1}}
+.err-strip{background:#fff1f2;border:1px solid #fca5a5;border-radius:8px;padding:10px 14px;color:#dc2626;font-size:12px}
+
+/* ── BUTTONS ── */
+.btn{border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;transition:all .15s}
+.b-blue{background:#003087;color:#fff}.b-blue:hover{background:#1a4db5}
+.b-green{background:#14532d;color:#fff}.b-green:hover{background:#166534}
+.b-ghost{background:#fff;color:#003087;border:2px solid #b8c8e0}.b-ghost:hover{background:#f0f6ff}
+.b-red{background:#dc2626;color:#fff}.b-red:hover{background:#b91c1c}
+.b-big{width:100%;padding:15px;font-size:16px;border-radius:10px}
+
+/* ── RUBRIC TABLE ── */
+.rub-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.rub-dim{background:#f7faff;border:1px solid #dde8f5;border-radius:8px;padding:10px 12px}
+.rub-dim .rd-h{font-weight:700;font-size:11px;color:#003087;margin-bottom:6px}
+.rub-dim p{font-size:10px;color:#445;line-height:1.55;margin-bottom:3px}
+
+@media(max-width:700px){
+  #split{flex-direction:column}
+  .l-pane{width:100%;height:45vh;border-right:none;border-bottom:2px solid #b8c8e0}
+  .rpt-stat-row,.sg-row,.rub-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ HEADER ══ -->
+<div id="hdr" class="hidden">
+  <div class="hdr-left">
+    <div class="nj-badge">NJ</div>
+    <div class="hdr-titles">
+      <div class="ht1">New Jersey Student Learning Assessment</div>
+      <div class="ht2" id="hdr-sub">Grade 3 ELA — Research Simulation Task</div>
+    </div>
+  </div>
+  <div class="hdr-right">
+    <button class="hdr-tool" id="btn-line" onclick="toggleLinereader()">▤ Line Reader</button>
+    <button class="hdr-tool" id="btn-elim" onclick="toggleElim()">✗ Eliminator</button>
+    <button class="hdr-tool" id="btn-note" onclick="toggleNotepad()">📝 Notepad</button>
+    <button class="hdr-tool" onclick="toggleZoom()">🔍 Zoom</button>
+    <div id="timer-box">90:00</div>
+  </div>
+</div>
+
+<!-- ══ NOTEPAD ══ -->
+<div id="notepad-float" class="hidden">
+  <div class="np-hdr">Scratch Pad — not scored<button onclick="toggleNotepad()">×</button></div>
+  <textarea id="notepad-text" placeholder="Notes will NOT be scored."></textarea>
+</div>
+
+<!-- ══ ZOOM ══ -->
+<div id="zoom-ctrl" class="hidden">
+  <span>Zoom</span>
+  <button onclick="zoom(-1)">−</button>
+  <span id="zoom-pct">100%</span>
+  <button onclick="zoom(1)">+</button>
+  <button onclick="toggleZoom()" style="margin-left:4px">✕</button>
+</div>
+
+<!-- ══ LINE READER ══ -->
+<div id="line-reader" class="hidden" style="position:fixed;left:0;right:0;height:36px;background:rgba(255,230,0,.35);pointer-events:none;z-index:200;transition:top .1s"></div>
+
+<!-- ════════════════════════════════════════════
+     SCREEN 0 — EXAM SELECTOR
+     ════════════════════════════════════════════ -->
+<div id="s-selector">
+  <div class="sel-hdr">
+    <h1>NJSLA Grade 3 ELA — Practice Exam Generator</h1>
+    <p>Choose a practice exam below. Each exam has two reading passages, comprehension questions, and a writing task.</p>
+  </div>
+  <div class="exam-grid" id="exam-grid"></div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     SCREEN 1 — WELCOME / DIRECTIONS
+     ════════════════════════════════════════════ -->
+<div id="s-welcome" class="screen hidden" style="background:linear-gradient(160deg,#001840 0%,#003087 60%,#0050c8 100%);min-height:100vh;align-items:center;justify-content:center;padding:20px">
+  <div class="welcome-box">
+    <div class="wlc-hero">
+      <div class="wlc-logo">NJ</div>
+      <div>
+        <div style="font-size:11px;color:#777;letter-spacing:2px;text-transform:uppercase;font-weight:600;margin-bottom:2px">New Jersey Student Learning Assessment</div>
+        <div style="font-size:21px;font-weight:800;color:#003087" id="wlc-exam-title">Grade 3 ELA Performance Task</div>
+      </div>
+    </div>
+    <div class="info-2col">
+      <div><strong>Task Type:</strong> Research Simulation Task</div>
+      <div><strong>Total Time:</strong> 90 minutes</div>
+      <div><strong>Number of Parts:</strong> 2</div>
+      <div><strong>Grade Level:</strong> 3</div>
+    </div>
+    <div style="font-weight:700;color:#003087;margin-bottom:8px;font-size:14px">Test Directions</div>
+    <ul class="dir-ul">
+      <li>You will read <strong>two sources</strong> about a topic.</li>
+      <li>In <strong>Part 1</strong>, answer multiple-choice questions about each source.</li>
+      <li>In <strong>Part 2</strong>, write an informational article using <strong>both sources</strong>.</li>
+      <li>Use the <strong>Notepad</strong> to take notes at any time. Notes are not scored.</li>
+      <li>Use <strong>Flag for Review</strong> to mark questions to revisit.</li>
+      <li>Review your answers before submitting.</li>
+    </ul>
+    <div class="warn-strip"><strong>⚠ Important:</strong> The 90-minute timer begins when you click "Begin Test." Make sure you are ready.</div>
+    <button class="btn b-blue b-big" onclick="beginTest()">Begin Test →</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     SCREEN 2 — PART 1 DIRECTIONS
+     ════════════════════════════════════════════ -->
+<div id="s-p1dir" class="screen hidden" style="min-height:calc(100vh - 52px);align-items:center;justify-content:center;background:#f5f8ff;padding:20px">
+  <div class="dir-card">
+    <div class="part-pill pill-blue">PART 1 OF 2 — READING &amp; QUESTIONS</div>
+    <h2 style="color:#003087;font-size:21px;margin-bottom:14px">Reading and Questions</h2>
+    <p style="color:#4a5568;font-size:14px;line-height:1.8;margin-bottom:14px">You will read <strong>two sources</strong>. After reading each source, answer the <strong>multiple-choice questions</strong> about it.</p>
+    <p style="color:#4a5568;font-size:14px;line-height:1.8;margin-bottom:20px">You may look back at the source as often as you need. Select the <strong>best answer</strong> for each question.</p>
+    <div class="tip-strip"><strong>💡 Tip:</strong> Use the Notepad or highlight important ideas as you read. You can use the <strong>Answer Eliminator</strong> to cross out choices you know are wrong.</div>
+    <button class="btn b-blue" onclick="goToQuestions()">Start Part 1 →</button>
+  </div>
+  <div class="btm-bar" style="position:fixed;bottom:0;left:0;right:0">
+    <span></span><span class="ctr">Part 1 of 2 — Reading &amp; Comprehension Questions</span><span></span>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     SCREEN 3 — QUESTIONS
+     ════════════════════════════════════════════ -->
+<div id="s-qs" class="screen full-h hidden">
+  <div id="q-nav-bar">
+    <span style="font-size:11px;font-weight:700;color:#334;margin-right:6px">QUESTIONS:</span>
+    <div id="q-dots"></div>
+    <div class="q-tools">
+      <span id="q-ans-count" style="font-size:11px;color:#555">0/5 answered</span>
+      <button class="q-tool-btn" id="flag-btn" onclick="toggleFlag()">🚩 Flag</button>
+    </div>
+  </div>
+  <div id="split">
+    <div class="l-pane" id="l-pane">
+      <div class="pane-hdr"><div class="ph-src" id="p-src"></div><div class="ph-ttl" id="p-ttl"></div></div>
+      <div class="pane-body" id="p-body"></div>
+    </div>
+    <div class="r-pane" id="r-pane">
+      <div class="q-label" id="q-lbl"></div>
+      <div id="q-meta"></div>
+      <div class="q-stem" id="q-stem"></div>
+      <div class="choices" id="choices"></div>
+    </div>
+  </div>
+  <div class="btm-bar">
+    <button class="btn b-ghost" id="btn-bk" onclick="navQ(-1)">← Back</button>
+    <span class="ctr" id="q-prog"></span>
+    <button class="btn b-blue" id="btn-fwd" onclick="navQ(1)">Next →</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     SCREEN 4 — REVIEW ANSWERS
+     ════════════════════════════════════════════ -->
+<div id="s-review" class="screen hidden">
+  <div class="review-wrap">
+    <div style="margin-bottom:20px">
+      <h2 style="color:#003087;font-size:20px;margin-bottom:6px">Review Your Answers</h2>
+      <p style="font-size:14px;color:#555">Check your answers before moving to Part 2. Click any question to go back and change your answer.</p>
+    </div>
+    <div id="rev-list"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:20px;padding-bottom:30px">
+      <button class="btn b-ghost" onclick="goToQuestions()">← Back to Questions</button>
+      <button class="btn b-green" onclick="showScreen('s-p2dir')">Continue to Part 2 →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     SCREEN 5 — PART 2 DIRECTIONS
+     ════════════════════════════════════════════ -->
+<div id="s-p2dir" class="screen hidden" style="min-height:calc(100vh - 52px);align-items:center;justify-content:center;background:#f5f8ff;padding:20px">
+  <div class="dir-card" style="max-width:660px">
+    <div class="part-pill pill-green">PART 2 OF 2 — WRITING TASK</div>
+    <h2 style="color:#003087;font-size:21px;margin-bottom:14px">Writing Task</h2>
+    <p style="color:#4a5568;font-size:14px;line-height:1.8;margin-bottom:14px">You have read two sources. Now you will write an <strong>informational article</strong> using what you learned.</p>
+    <div class="prompt-highlight">
+      <div style="font-weight:800;color:#003087;font-size:13px;margin-bottom:8px">Your Writing Prompt</div>
+      <p id="writing-prompt-text" style="font-size:14px;color:#1e293b;line-height:1.8;margin:0"></p>
+    </div>
+    <div style="font-weight:700;color:#003087;font-size:13px;margin:16px 0 8px">Remember to:</div>
+    <ul style="color:#4a5568;font-size:14px;line-height:2.1;padding-left:20px;margin-bottom:24px">
+      <li>Introduce your topic clearly</li>
+      <li>Use facts and details from <strong>both sources</strong></li>
+      <li>Organize your ideas so they are easy to follow</li>
+      <li>Elaborate on your ideas — don't just list facts</li>
+      <li>Write a conclusion that wraps up your writing</li>
+      <li>Check your spelling, punctuation, and grammar</li>
+    </ul>
+    <button class="btn b-blue" onclick="showScreen('s-write');loadRef(0)">Start Writing →</button>
+  </div>
+  <div class="btm-bar" style="position:fixed;bottom:0;left:0;right:0">
+    <button class="btn b-ghost" onclick="showReview()">← Review Part 1</button>
+    <span class="ctr">Part 2 of 2 — Writing Task</span><span></span>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     SCREEN 6 — WRITING
+     ════════════════════════════════════════════ -->
+<div id="s-write" class="screen full-h hidden">
+  <div id="src-tabs"><div id="stab-inner"></div><span style="margin-left:auto;font-size:10px;color:#667;padding:8px 0;font-style:italic">You may refer to both sources</span></div>
+  <div id="write-split" style="flex:1;display:flex;overflow:hidden">
+    <div class="l-pane" id="ref-pane">
+      <div class="pane-hdr"><div class="ref-src-label" id="ref-src-lbl"></div><div class="ref-ttl" id="ref-ttl"></div></div>
+      <div class="pane-body" id="ref-body"></div>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+      <div class="pbar"><strong>Prompt:</strong> <span id="pbar-text"></span></div>
+      <div id="toolbar">
+        <span style="font-size:11px;font-weight:700;color:#003087;margin-right:4px">Tools:</span>
+        <button class="tb-btn" onclick="document.execCommand('undo')">Undo</button>
+        <button class="tb-btn" onclick="document.execCommand('redo')">Redo</button>
+        <button class="tb-btn" onclick="document.execCommand('cut')">Cut</button>
+        <button class="tb-btn" onclick="document.execCommand('copy')">Copy</button>
+        <span id="wc-pill" class="low">Words: 0</span>
+      </div>
+      <textarea id="essay" oninput="updateWC()" placeholder="Begin writing your article here.&#10;&#10;&#x2022; Write an introduction that names your topic&#10;&#x2022; Use details from BOTH sources in your body paragraphs&#10;&#x2022; Elaborate — explain WHY the details matter&#10;&#x2022; Write a strong conclusion&#10;&#10;Your notes from the Scratch Pad may help you plan."></textarea>
+    </div>
+  </div>
+  <div class="btm-bar">
+    <button class="btn b-ghost" onclick="showReview()">← Review Part 1</button>
+    <span class="ctr">Part 2 — Writing Task</span>
+    <button class="btn" id="submit-btn" onclick="confirmSubmit()" style="background:#9ca3af;color:#fff;cursor:default">Submit Test ✓</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     SCREEN 7 — CONFIRM SUBMIT
+     ════════════════════════════════════════════ -->
+<div id="s-confirm" class="screen hidden">
+  <div class="confirm-card">
+    <div style="font-size:48px;margin-bottom:12px">📋</div>
+    <h2 style="color:#003087;font-size:20px;margin-bottom:10px">Submit Your Test?</h2>
+    <p style="color:#555;font-size:14px;line-height:1.7;margin-bottom:8px">Once submitted, you cannot go back and change your answers.</p>
+    <div id="confirm-stats" style="background:#f0f6ff;border:1px solid #c8d8ea;border-radius:8px;padding:14px;margin:16px 0;font-size:13px;text-align:left"></div>
+    <div style="display:flex;gap:12px;justify-content:center">
+      <button class="btn b-ghost" onclick="showScreen('s-write')">← Go Back</button>
+      <button class="btn b-green" onclick="finalSubmit()">Yes, Submit →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     SCREEN 8 — SCORE REPORT
+     ════════════════════════════════════════════ -->
+<div id="s-report" class="screen hidden">
+  <div class="rpt-wrap">
+    <div class="rpt-banner">
+      <div>
+        <div style="font-size:10px;opacity:.7;letter-spacing:1.5px;text-transform:uppercase">New Jersey Student Learning Assessment</div>
+        <div style="font-size:18px;font-weight:800" id="rpt-exam-name"></div>
+      </div>
+      <div style="text-align:right;font-size:12px;opacity:.85" id="rpt-meta"></div>
+    </div>
+
+    <div class="rpt-stat-row">
+      <div class="rpt-stat"><div class="rs-lbl">Part 1 — Reading</div><div class="rs-val" id="rs-mc" style="color:#003087">—</div><div class="rs-sub">Comprehension</div></div>
+      <div class="rpt-stat"><div class="rs-lbl">Part 2 — Writing</div><div class="rs-val" id="rs-wr" style="color:#888">—</div><div class="rs-sub" id="rs-wr-sub">Not yet scored</div></div>
+      <div class="rpt-stat"><div class="rs-lbl">Total Score</div><div class="rs-val" id="rs-tot" style="color:#334">—</div><div class="rs-sub">/ 19 points</div></div>
+    </div>
+
+    <!-- Part 1 review -->
+    <div class="rpt-card">
+      <div class="rpt-card-title">Part 1 — Reading Comprehension Review</div>
+      <div id="rpt-mc-review"></div>
+    </div>
+
+    <!-- Writing scores -->
+    <div class="rpt-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:10px;margin-bottom:14px;border-bottom:2px solid #e5edfa">
+        <div style="font-weight:700;color:#003087;font-size:14px">Part 2 — Writing Score Report (NJSLA Rubric)</div>
+        <button class="btn b-green" id="score-my-btn" onclick="scoreEssay()" style="font-size:12px;padding:8px 16px">Score My Writing</button>
+      </div>
+      <div id="score-area"><div style="background:#f7faff;border:1px dashed #b8c8e0;border-radius:8px;padding:18px;text-align:center;font-size:13px;color:#555">Click "Score My Writing" above to receive your NJSLA rubric score.</div></div>
+    </div>
+
+    <!-- Rubric reference -->
+    <div class="rpt-card">
+      <div class="rpt-card-title">NJSLA Grade 3 Writing Rubric Reference</div>
+      <div class="rub-grid">
+        <div class="rub-dim"><div class="rd-h">Organization (4 pts)</div><p>4 — Effective: clear intro, body, conclusion; transitions</p><p>3 — Adequate: structure present; some transitions</p><p>2 — Inconsistent: weak intro or conclusion; few transitions</p><p>1 — Minimal: no clear structure; hard to follow</p></div>
+        <div class="rub-dim"><div class="rd-h">Evidence Use (4 pts)</div><p>4 — Thorough: both sources used; accurate; clearly cited</p><p>3 — Adequate: both sources; mostly accurate</p><p>2 — Partial: may use one source; limited detail</p><p>1 — Minimal: little or no source evidence</p></div>
+        <div class="rub-dim"><div class="rd-h">Development (4 pts)</div><p>4 — Full elaboration; domain vocabulary; deep understanding</p><p>3 — Some elaboration; some vocabulary; shows understanding</p><p>2 — Limited elaboration; basic vocabulary</p><p>1 — Ideas not developed or explained</p></div>
+        <div class="rub-dim" style="grid-column:1/-1"><div class="rd-h">Grammar &amp; Conventions (2 pts)</div><p>2 — Few or no errors; demonstrates Grade 3 writing control</p><p>1 — Some errors; meaning is mostly clear</p><p>0 — Many errors that interfere with meaning</p></div>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:center;gap:12px;padding-bottom:30px">
+      <button class="print-btn" onclick="window.print()">🖨 Print Report</button>
+      <button class="btn b-blue" onclick="backToSelector()" style="padding:10px 24px">← Choose Another Exam</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+//  EXAM DATA  (5 original practice sets)
+// ══════════════════════════════════════════════════════════════
+const EXAMS = [
+{
+  id:1, topic:"Life Science", title:"Animals in Action",
+  desc:"Explore how service animals and nature's pollinators help people and the world.",
+  passages:[
+    { source:"Source 1", title:"Service Dogs: Partners for Life",
+      body:[
+        "A service dog is more than just a pet. It is a specially trained working animal that helps a person with a disability live a more independent life. Service dogs help people every single day, and their training takes months of hard work.",
+        "There are many kinds of service dogs. Guide dogs help people who cannot see by walking safely around obstacles, stopping at curbs, and finding important locations like doors and stairs. Hearing dogs alert people who are deaf or hard of hearing to sounds they cannot hear on their own, such as a doorbell, a smoke alarm, or someone calling their name.",
+        "Medical alert dogs are trained to detect changes in a person's body. Some can sense when a person with diabetes has low blood sugar, giving a warning before the person feels sick. Others alert people who have seizures so they can get to a safe place.",
+        "Therapy dogs are a different kind of helper. They visit hospitals, schools, and nursing homes to bring comfort and calm to people who are stressed or lonely. Studies show that spending time with a dog can lower a person's heart rate and help them feel happier.",
+        "Becoming a service dog is not easy. Dogs are carefully selected for their calm, friendly personalities and then spend more than a year in training. Handlers — the people who work with service dogs — also learn how to care for and communicate with their animal partner. Together, they form a team built on trust."
+      ]
+    },
+    { source:"Source 2", title:"Bees: Nature's Busy Workers",
+      body:[
+        "If you have ever enjoyed a strawberry, an apple, or a handful of almonds, you have a bee to thank. Bees are among the most important animals in the natural world, and the work they do affects almost everything we eat.",
+        "Bees are pollinators. When a bee lands on a flower to collect sweet nectar for food, tiny grains of pollen from the flower stick to the bee's fuzzy body. When the bee flies to the next flower, some of that pollen falls off and fertilizes the plant. This process, called pollination, allows flowering plants to produce seeds and fruit.",
+        "About one third of all the food humans eat — including many fruits, vegetables, and nuts — depends on pollination by bees and other insects. Without bees, farmers would struggle to grow enough food to feed the world's population.",
+        "Bees also produce honey, one of nature's most remarkable foods. Worker bees collect nectar and bring it back to the hive, where other bees fan it with their wings to remove moisture. The result is thick, sweet honey that does not spoil for thousands of years. Archaeologists have found honey in ancient Egyptian tombs that is still safe to eat.",
+        "Despite their importance, bee populations around the world have been declining. Habitat loss, pesticide use, and disease have all taken a toll. Communities, schools, and farmers are planting bee-friendly gardens, reducing chemical use, and setting up hives to help bee populations recover."
+      ]
+    }
+  ],
+  questions:[
+    { pi:0, stem:"According to 'Service Dogs: Partners for Life,' what is the main purpose of a service dog?",
+      choices:["To compete in dog shows and obedience contests","To help a person with a disability live more independently","To guard homes and protect families from danger","To provide entertainment at schools and community events"], correct:1 },
+    { pi:0, prompt:'Read this sentence from the passage.', quote:'"Together, they form a team built on trust."',
+      stem:"Which detail from the passage BEST explains why trust is important for service dog teams?",
+      choices:["Service dogs are selected for calm, friendly personalities","Guide dogs walk around obstacles and stop at curbs","Handlers learn how to care for and communicate with their animal partner","Therapy dogs visit hospitals and schools to comfort people"], correct:2 },
+    { pi:1, stem:"What is the MAIN idea of 'Bees: Nature's Busy Workers'?",
+      choices:["Bees produce honey that can last for thousands of years","Bees are essential helpers whose work supports both nature and the human food supply","Bee populations are declining because of pesticides and habitat loss","Bees collect nectar from flowers to bring back to their hives"], correct:1 },
+    { pi:1, stem:"According to the passage, about how much of the food humans eat depends on bee pollination?",
+      choices:["About one half","About one quarter","About one third","About two thirds"], correct:2 },
+    { pi:1, prompt:'Read this sentence from the passage.', quote:'"Archaeologists have found honey in ancient Egyptian tombs that is still safe to eat."',
+      stem:"Why does the author include this detail?",
+      choices:["To show that ancient Egyptians were the first to keep bees","To explain why archaeologists study ancient civilizations","To show just how remarkable honey is as a natural food","To argue that people should eat more honey"], correct:2 }
+  ],
+  prompt:"Write an informational article explaining how animals help people and the natural world. Use important details from BOTH sources to support your writing."
+},
+{
+  id:2, topic:"Earth Science", title:"Water and Life",
+  desc:"Discover how the water cycle works and why Earth's oceans are vital to all living things.",
+  passages:[
+    { source:"Source 1", title:"The Water Cycle: Water's Never-Ending Journey",
+      body:[
+        "Water is the only substance on Earth that naturally exists as a solid, a liquid, and a gas. It moves in a continuous loop called the water cycle, traveling from the surface of the Earth up into the atmosphere and back down again. This cycle has been happening for billions of years.",
+        "The cycle begins with evaporation. When the sun heats water in oceans, lakes, and rivers, the water turns into invisible water vapor and rises into the air. Plants also release water vapor through their leaves in a process called transpiration. Together, evaporation and transpiration send enormous amounts of water into the atmosphere every day.",
+        "As water vapor rises higher into the atmosphere, it cools down. Cool air cannot hold as much water vapor as warm air, so the vapor turns back into tiny water droplets. These droplets collect around small particles of dust or pollen, forming clouds. This process is called condensation.",
+        "Eventually, the water droplets in clouds combine to form larger and larger drops. When they become heavy enough, they fall to Earth as precipitation — rain, snow, sleet, or hail, depending on the temperature. Most precipitation lands in the ocean, but some falls on land.",
+        "Precipitation that falls on land either soaks into the soil to become groundwater, flows into streams and rivers as runoff, or is taken up by plant roots. Water that enters rivers and streams eventually flows back to the ocean, and the cycle begins again. The water cycle keeps Earth's water supply moving and helps regulate the planet's climate."
+      ]
+    },
+    { source:"Source 2", title:"Why the Ocean Matters",
+      body:[
+        "Covering more than seventy percent of Earth's surface, the ocean is the largest feature on our planet. It is also one of the most important. The ocean helps support nearly all life on Earth in ways both obvious and surprising.",
+        "One of the ocean's most important roles is regulating Earth's temperature. Water heats up and cools down much more slowly than land. Ocean currents carry warm water from the tropics toward the poles and cold water toward the equator, spreading heat around the planet and keeping temperatures from becoming too extreme. Without the ocean, many parts of Earth would be too hot or too cold to support life.",
+        "The ocean is also a major source of oxygen. Tiny ocean plants called phytoplankton produce more than half of all the oxygen in Earth's atmosphere through photosynthesis. Every other breath a human takes comes from phytoplankton floating in the sea.",
+        "The ocean provides food for billions of people. Fish, shellfish, seaweed, and other marine foods are eaten by people in nearly every country on Earth. Fishing and fish farming are major industries that support millions of jobs worldwide.",
+        "Despite its importance, the ocean faces serious threats. Pollution, overfishing, rising ocean temperatures, and acidification from increased carbon dioxide in the atmosphere are damaging marine ecosystems. Scientists and governments around the world are working to create marine protected areas and reduce the pollution that threatens ocean health."
+      ]
+    }
+  ],
+  questions:[
+    { pi:0, stem:"According to 'The Water Cycle,' what causes evaporation to occur?",
+      choices:["Wind blows water vapor off the surface of the ocean","The sun heats water, causing it to turn into water vapor and rise","Cold air in the atmosphere causes water to become a gas","Clouds release water back into rivers and lakes"], correct:1 },
+    { pi:0, stem:"Which correctly describes the ORDER of stages in the water cycle?",
+      choices:["Condensation → Evaporation → Precipitation → Runoff","Precipitation → Condensation → Evaporation → Runoff","Evaporation → Condensation → Precipitation → Runoff","Runoff → Precipitation → Evaporation → Condensation"], correct:2 },
+    { pi:1, stem:"According to 'Why the Ocean Matters,' what is ONE way the ocean helps regulate Earth's temperature?",
+      choices:["Ocean water absorbs all sunlight so it does not reach the land","Ocean currents carry warm and cold water around the planet to spread heat evenly","The ocean releases oxygen that keeps the atmosphere from getting too warm","Ocean plants produce shade that cools the land nearby"], correct:1 },
+    { pi:1, stem:"According to the passage, where does more than half of Earth's oxygen come from?",
+      choices:["Large rain forests near the equator","Freshwater rivers and streams","Tiny ocean plants called phytoplankton","Ice caps at the North and South Poles"], correct:2 },
+    { pi:1, prompt:'Read this sentence from the passage.', quote:'"Every other breath a human takes comes from phytoplankton floating in the sea."',
+      stem:"Why does the author most likely include this detail?",
+      choices:["To explain why people should swim in the ocean more often","To show how surprising and important ocean life is to human survival","To describe how phytoplankton is harvested as food","To argue that people breathe too quickly"], correct:1 }
+  ],
+  prompt:"Write an informational article explaining why water is important to life on Earth. Use important details from BOTH sources to support your ideas."
+},
+{
+  id:3, topic:"Social Studies", title:"Community Heroes",
+  desc:"Learn how firefighters and public libraries serve and support their communities every day.",
+  passages:[
+    { source:"Source 1", title:"Firefighters: Ready to Respond",
+      body:[
+        "When an alarm sounds at a fire station, firefighters leap into action. Within sixty seconds, they are dressed in full gear and climbing onto a fire truck. Whether it is two in the afternoon or two in the morning, firefighters are always prepared to respond to an emergency.",
+        "Firefighters do much more than fight fires. They respond to car accidents, floods, gas leaks, and medical emergencies. In many communities, firefighters are the first emergency workers to arrive at the scene of any crisis. They are trained as first responders who can provide basic medical care until an ambulance arrives.",
+        "Becoming a firefighter requires significant preparation. Candidates must pass physical fitness tests and written exams. They attend fire academies where they learn how to handle hoses, use ladders, operate rescue equipment, and navigate through buildings filled with smoke. Training never stops — even experienced firefighters practice new techniques regularly.",
+        "One of a firefighter's most important jobs is fire prevention. Firefighters visit schools and community centers to teach fire safety. They inspect buildings to make sure exit signs are lit, fire extinguishers are ready, and smoke detectors are in working order. Preventing fires is just as important as fighting them.",
+        "Firefighters often describe their job as a calling, not just a career. Many come from families where parents or grandparents were also firefighters. The tight-knit bond among members of a fire crew is legendary — they eat meals together, train together, and rely on each other completely when danger is at its most intense."
+      ]
+    },
+    { source:"Source 2", title:"Libraries: More Than a Place for Books",
+      body:[
+        "Many people think of a library as simply a quiet place to borrow books. In fact, today's public libraries are community centers that offer a wide range of services and resources for people of all ages.",
+        "Libraries provide free access to computers and the internet for people who do not have them at home. For job seekers, students, and small business owners, this access can be essential. Libraries also offer printing, copying, and scanning services, along with free Wi-Fi for visitors who bring their own devices.",
+        "Children's sections in public libraries are designed to spark curiosity and a love of reading. Story hours, craft programs, summer reading challenges, and author visits give young readers reasons to come back again and again. Research shows that children who visit the library regularly are better prepared for school and more likely to become lifelong readers.",
+        "Libraries also support adults with programs such as English language classes, citizenship test preparation, financial literacy workshops, and job skill training. In times of crisis, libraries have opened their doors as cooling centers, warming shelters, and community gathering places.",
+        "At the heart of every library is a librarian. Librarians are trained information professionals who help people find the resources they need, recommend books, teach research skills, and curate collections that reflect the community. Far from being simple book guardians, librarians are partners in learning for everyone who walks through the door."
+      ]
+    }
+  ],
+  questions:[
+    { pi:0, stem:"According to 'Firefighters: Ready to Respond,' what do firefighters do BESIDES fighting fires?",
+      choices:["They only work when there is a fire in a building","They respond to car accidents, medical emergencies, floods, and gas leaks","They teach classes at local colleges and universities","They design buildings with better fire safety systems"], correct:1 },
+    { pi:0, stem:"According to the passage, why is fire prevention an important part of a firefighter's job?",
+      choices:["Because most people do not know how to use a fire extinguisher","Because preventing fires is just as important as fighting them","Because firefighters need something to do when there are no emergencies","Because fire inspections are required by the federal government"], correct:1 },
+    { pi:1, stem:"What is the MAIN idea of 'Libraries: More Than a Place for Books'?",
+      choices:["Libraries offer free book borrowing to everyone in the community","Modern public libraries provide a wide range of essential services for people of all ages","Librarians are the most important employees in any school","Children who use libraries tend to do better on reading tests"], correct:1 },
+    { pi:1, stem:"According to the passage, how do libraries help people who do not have computers at home?",
+      choices:["They give away free computers to families in need","They provide free computer access, internet, printing, and copying services","They offer classes that teach people how to buy affordable computers","They allow people to borrow tablets and take them home"], correct:1 },
+    { pi:1, prompt:'Read this sentence from the passage.', quote:'"Far from being simple book guardians, librarians are partners in learning for everyone who walks through the door."',
+      stem:"What does the author mean by describing librarians as 'partners in learning'?",
+      choices:["Librarians are in charge of ordering all new books for the library","Librarians actively help people find resources, learn, and develop skills","Librarians work as volunteers without receiving any pay","Librarians only help children and students, not adults"], correct:1 }
+  ],
+  prompt:"Write an informational article explaining how community helpers — such as firefighters and librarians — make life better for the people in their community. Use important details from BOTH sources to support your writing."
+},
+{
+  id:4, topic:"Life Science / Health", title:"The World of Plants",
+  desc:"Find out how plants make their own food and why the plants we eat are essential to our health.",
+  passages:[
+    { source:"Source 1", title:"How Plants Make Their Own Food",
+      body:[
+        "Unlike animals, plants do not need to hunt, forage, or eat other living things to get energy. They make their own food through an amazing process called photosynthesis. The word 'photosynthesis' comes from Greek words meaning 'light' and 'putting together.'",
+        "To carry out photosynthesis, a plant needs three ingredients: sunlight, water, and carbon dioxide gas. Water enters the plant through its roots and travels up the stem. Carbon dioxide, a gas found in the air, enters the plant through tiny pores in the leaves called stomata. Chlorophyll — the green pigment in leaves — captures energy from sunlight.",
+        "Using that energy, the plant combines water and carbon dioxide to produce glucose, a type of sugar that feeds the plant and helps it grow. The process also produces oxygen, which is released through the stomata into the air. The oxygen released by plants is the same oxygen that humans and animals breathe.",
+        "Photosynthesis is the foundation of almost all food chains on Earth. Plants use the glucose they produce to build roots, stems, leaves, flowers, and fruit. When animals eat plants, they take in the energy stored in that glucose. When other animals eat those animals, the energy is passed on again.",
+        "Even the energy in fossil fuels like coal and oil originally came from photosynthesis. Those fuels formed from the remains of ancient plants and animals that stored solar energy millions of years ago. In a very real sense, when we burn gasoline or coal, we are releasing sunlight that was captured long ago by leaves."
+      ]
+    },
+    { source:"Source 2", title:"Plants We Count On Every Day",
+      body:[
+        "Walk through any grocery store and you are surrounded by plants. Fruits, vegetables, grains, nuts, seeds, and cooking oils all come from plants. The variety of plant foods available to us today is the result of thousands of years of farming and plant cultivation around the world.",
+        "Grains are among the most important plant foods for people worldwide. Wheat, rice, corn, and oats provide carbohydrates, which give the body energy. Bread, pasta, tortillas, rice bowls, and oatmeal — all of these everyday foods start as grains grown in fields.",
+        "Fruits and vegetables are rich in vitamins, minerals, and fiber that keep our bodies healthy. Vitamin C from oranges and strawberries helps the immune system fight illness. Leafy green vegetables like spinach and kale provide iron and calcium that strengthen blood and bones. Eating a variety of colorful fruits and vegetables helps ensure the body gets the full range of nutrients it needs.",
+        "Plants also give us many products beyond food. Cotton is a plant fiber used to make clothing. Wood from trees is used for building homes and furniture. Many medicines, including aspirin, originally came from plant compounds. Rubber, paper, and many dyes and inks also have plant origins.",
+        "Despite the enormous variety of plants available, many people around the world do not have reliable access to diverse, nutritious plant foods. Food insecurity — not having enough food or enough variety — is a global challenge. Scientists, farmers, and aid organizations are working to develop crops that can grow in difficult conditions and provide better nutrition to more people."
+      ]
+    }
+  ],
+  questions:[
+    { pi:0, stem:"According to 'How Plants Make Their Own Food,' what THREE things does a plant need to carry out photosynthesis?",
+      choices:["Soil, water, and animals","Sunlight, water, and carbon dioxide","Oxygen, glucose, and sunlight","Carbon dioxide, glucose, and minerals"], correct:1 },
+    { pi:0, stem:"According to the passage, what TWO things does photosynthesis produce?",
+      choices:["Carbon dioxide and water","Chlorophyll and stomata","Glucose and oxygen","Sunlight and minerals"], correct:2 },
+    { pi:1, stem:"What is the MAIN idea of 'Plants We Count On Every Day'?",
+      choices:["Grains are the most important food group for human health","Plants are the source of many foods and products that people depend on every day","Scientists are working to develop new kinds of crops for difficult climates","Fruits and vegetables contain vitamins that help fight illness"], correct:1 },
+    { pi:1, stem:"According to the passage, why are grains important to people around the world?",
+      choices:["They are the only food that provides vitamins and minerals","They provide carbohydrates that give the body energy, and they are eaten by people in every culture","They are the easiest crops to grow in dry or cold climates","They contain more protein than any other kind of plant food"], correct:1 },
+    { pi:0, prompt:'Read this sentence from "How Plants Make Their Own Food."', quote:'"In a very real sense, when we burn gasoline or coal, we are releasing sunlight that was captured long ago by leaves."',
+      stem:"What does the author mean by this sentence?",
+      choices:["Burning fossil fuels creates new sunlight and oxygen","Fossil fuels were formed from ancient plants that stored solar energy through photosynthesis","Coal and oil are made by combining sunlight with water underground","Sunlight causes gasoline to evaporate into the atmosphere"], correct:1 }
+  ],
+  prompt:"Write an informational article explaining why plants are important to people and to the world around us. Use important details from BOTH sources to support your ideas."
+},
+{
+  id:5, topic:"Physical Science / Technology", title:"Energy from the Sun",
+  desc:"Investigate what makes our sun so powerful and how humans are learning to use solar energy.",
+  passages:[
+    { source:"Source 1", title:"The Sun: Our Extraordinary Star",
+      body:[
+        "The sun is the closest star to Earth, and without it, life on our planet could not exist. The sun sits at the center of our solar system, and its gravity holds all eight planets — including Earth — in their orbits. But gravity is not the sun's only gift to Earth.",
+        "The sun is a giant ball of hot gas made mostly of hydrogen and helium. Deep inside the sun, hydrogen atoms fuse together to form helium in a process called nuclear fusion. This process releases an enormous amount of energy in the form of light and heat. The sun releases more energy in one second than humans have used in all of recorded history.",
+        "Light from the sun reaches Earth in about eight minutes, traveling 93 million miles through space. This sunlight provides the energy that drives the water cycle, powers photosynthesis in plants, and warms the land, air, and water that make Earth livable. Without the sun's heat, Earth's average temperature would drop to about -450 degrees Fahrenheit — far too cold for any life.",
+        "Sunlight also controls Earth's seasons. Because Earth is tilted on its axis, different parts of the planet receive more direct sunlight at different times of year. When the Northern Hemisphere tilts toward the sun, it is summer there, with longer, warmer days. When it tilts away, it is winter, with shorter, colder days.",
+        "The sun also affects Earth in other ways. Solar flares — bursts of energy from the sun's surface — can interfere with satellites and electrical systems on Earth. The beautiful lights seen near the poles, called the northern and southern lights, are created when particles from the sun interact with Earth's atmosphere."
+      ]
+    },
+    { source:"Source 2", title:"Solar Energy: Catching the Sun's Power",
+      body:[
+        "The sun delivers an extraordinary amount of energy to Earth every hour — more than all of humanity uses in an entire year. For centuries, people dreamed of finding a way to capture that energy and put it to work. Today, thanks to advances in technology, that dream is becoming a reality through solar energy.",
+        "Solar panels, also called photovoltaic cells, convert sunlight directly into electricity. Each panel is made up of many small cells containing a material called silicon. When sunlight strikes the silicon, it causes electrons to move, creating an electric current. This electricity can power homes, schools, offices, and entire cities.",
+        "One of the greatest advantages of solar energy is that it is renewable. Unlike coal, oil, and natural gas, which took millions of years to form and will eventually run out, sunlight is available every day and will not be depleted for billions of years. Solar energy also produces no air pollution or greenhouse gases when generating electricity, making it far better for the environment than burning fossil fuels.",
+        "Solar energy has become much more affordable in recent years. The cost of solar panels has dropped by more than ninety percent since 2010. Homeowners, businesses, and governments around the world are installing solar panels at a rapid pace. Some countries now get a significant share of their electricity from solar energy.",
+        "Solar technology is also expanding into new areas. Solar-powered cars, boats, and aircraft are being developed. Solar energy is used to power satellites and space stations. In remote areas without power lines, solar panels provide electricity to schools, clinics, and homes that would otherwise have none. As technology continues to improve, solar energy may become the world's largest source of electricity."
+      ]
+    }
+  ],
+  questions:[
+    { pi:0, stem:"According to 'The Sun: Our Extraordinary Star,' what process produces the sun's energy?",
+      choices:["Photosynthesis of gases in the sun's outer layer","Nuclear fusion of hydrogen atoms deep inside the sun","The burning of oxygen around the sun's surface","Gravity pulling planets toward the sun's core"], correct:1 },
+    { pi:0, stem:"According to the passage, approximately how long does it take sunlight to travel from the sun to Earth?",
+      choices:["About eight seconds","About eight minutes","About eight hours","About eight days"], correct:1 },
+    { pi:1, stem:"What is the MAIN idea of 'Solar Energy: Catching the Sun's Power'?",
+      choices:["Solar panels are too expensive for most families to afford","Advances in technology have made it possible to capture the sun's energy and use it as a clean, renewable power source","The sun produces more electricity than any other energy source on Earth","Solar energy is only useful in countries that receive a lot of sunshine"], correct:1 },
+    { pi:1, stem:"According to the passage, what makes solar energy 'renewable'?",
+      choices:["Solar panels can be recycled and used again after they wear out","Sunlight is available every day and will not run out for billions of years","Solar energy can be stored in batteries for use at night","Governments can renew contracts with solar companies each year"], correct:1 },
+    { pi:0, prompt:'Read this sentence from "The Sun: Our Extraordinary Star."', quote:'"The sun releases more energy in one second than humans have used in all of recorded history."',
+      stem:"Why does the author most likely include this statement?",
+      choices:["To show that scientists have not measured the sun's energy correctly","To suggest that humans should not use energy from any other source","To emphasize how incredibly powerful the sun is","To explain why the sun will eventually run out of energy"], correct:2 }
+  ],
+  prompt:"Write an informational article explaining how the sun is important to people and to the natural world. Use important details from BOTH sources to support your ideas."
+}
+];
+
+// ══════════════════════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════════════════════
+let exam=null, currentQ=0, answers={}, flagged={}, elims={};
+let timeLeft=90*60, timerID=null, elimMode=false, lineMode=false;
+let zoomLevel=100, zoomVisible=false;
+let scoreData=null;
+const LETTERS=['A','B','C','D'];
+const allScores={};
+
+// ══════════════════════════════════════════════════════════════
+//  SELECTOR
+// ══════════════════════════════════════════════════════════════
+function buildSelector(){
+  const grid=document.getElementById('exam-grid');
+  grid.innerHTML=EXAMS.map(e=>{
+    const done=allScores[e.id];
+    return `<div class="exam-card${done?' ec-done':''}" onclick="selectExam(${e.id})">
+      <div class="ec-num">${e.id}</div>
+      <div class="ec-topic">${e.topic}</div>
+      <div class="ec-title">${e.title}</div>
+      <div class="ec-desc">${e.desc}</div>
+      <div class="ec-meta">
+        <span class="ec-tag">90 min</span>
+        <span class="ec-tag">2 passages</span>
+        <span class="ec-tag">${e.questions.length} questions</span>
+        <span class="ec-tag">Writing task</span>
+      </div>
+      ${done?`<div class="ec-score">Last score: ${done.mc}/${e.questions.length} Reading  |  ${done.writing!==null?done.writing+'/14':' writing pending'} Writing</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+function selectExam(id){
+  exam=EXAMS.find(e=>e.id===id);
+  answers={}; flagged={}; elims={}; scoreData=null; currentQ=0;
+  timeLeft=90*60; clearInterval(timerID);
+  document.getElementById('essay').value='';
+  document.getElementById('wc-pill').textContent='Words: 0';
+  document.getElementById('wc-pill').className='low';
+  document.getElementById('submit-btn').style.cssText='background:#9ca3af;color:#fff;cursor:default';
+  document.getElementById('score-my-btn').style.display='';
+  document.getElementById('score-area').innerHTML='<div style="background:#f7faff;border:1px dashed #b8c8e0;border-radius:8px;padding:18px;text-align:center;font-size:13px;color:#555">Click "Score My Writing" above to receive AI-powered NJSLA rubric feedback.</div>';
+  document.getElementById('wlc-exam-title').textContent='Exam '+exam.id+': '+exam.title;
+  document.getElementById('hdr-sub').textContent='Grade 3 ELA — Exam '+exam.id+': '+exam.title;
+  document.getElementById('writing-prompt-text').textContent=exam.prompt;
+  document.getElementById('pbar-text').textContent=exam.prompt;
+  document.getElementById('hdr').classList.remove('hidden');
+  updateTimerDisplay();
+  showScreen('s-welcome');
+}
+
+function backToSelector(){
+  clearInterval(timerID);
+  document.getElementById('hdr').classList.add('hidden');
+  showScreen('s-selector');
+}
+
+// ══════════════════════════════════════════════════════════════
+//  SCREEN NAV
+// ══════════════════════════════════════════════════════════════
+const SCREENS=['s-selector','s-welcome','s-p1dir','s-qs','s-review','s-p2dir','s-write','s-confirm','s-report'];
+function showScreen(id){
+  SCREENS.forEach(s=>document.getElementById(s).classList.toggle('hidden',s!==id));
+}
+
+function beginTest(){
+  showScreen('s-p1dir');
+  timerID=setInterval(()=>{
+    if(--timeLeft<=0){clearInterval(timerID);finalSubmit();return;}
+    updateTimerDisplay();
+  },1000);
+}
+
+function updateTimerDisplay(){
+  const m=String(Math.floor(timeLeft/60)).padStart(2,'0');
+  const s=String(timeLeft%60).padStart(2,'0');
+  const t=document.getElementById('timer-box');
+  t.textContent=m+':'+s;
+  t.className=timeLeft<=600?'warn':'';
+}
+
+// ══════════════════════════════════════════════════════════════
+//  QUESTIONS
+// ══════════════════════════════════════════════════════════════
+function goToQuestions(){ showScreen('s-qs'); renderQ(currentQ); }
+
+function renderQ(i){
+  currentQ=i;
+  const q=exam.questions[i], p=exam.passages[q.pi];
+  // passage
+  document.getElementById('p-src').textContent=p.source;
+  document.getElementById('p-ttl').textContent=p.title;
+  document.getElementById('p-body').innerHTML=p.body.map((t,pi)=>`<p style="font-size:${zoomLevel/100*15}px">${t}</p>`).join('');
+  // question
+  document.getElementById('q-lbl').textContent=`Question ${i+1} of ${exam.questions.length}`;
+  document.getElementById('q-prog').textContent=`Question ${i+1} / ${exam.questions.length}`;
+  // meta (prompt + quote)
+  let meta='';
+  if(q.prompt) meta+=`<div class="q-italic">${q.prompt}</div>`;
+  if(q.quote) meta+=`<div class="q-quote-box">${q.quote}</div>`;
+  document.getElementById('q-meta').innerHTML=meta;
+  document.getElementById('q-stem').textContent=q.stem;
+  // choices
+  const elimSet=elims[i]||new Set();
+  document.getElementById('choices').innerHTML=q.choices.map((ch,ci)=>{
+    const sel=answers[i]===ci, el=elimSet.has(ci);
+    return `<button class="choice-btn${sel?' sel':''}${el?' elim':''}" onclick="selectAns(${i},${ci})">
+      <div class="choice-letter">${LETTERS[ci]}</div>
+      <div class="choice-text">${ch}</div>
+    </button>`;
+  }).join('');
+  // nav buttons
+  const bk=document.getElementById('btn-bk');
+  bk.style.opacity=i===0?'.4':'1';
+  bk.style.pointerEvents=i===0?'none':'';
+  const fwd=document.getElementById('btn-fwd');
+  if(i===exam.questions.length-1){
+    fwd.textContent='Review Answers →'; fwd.className='btn b-green';
+    fwd.onclick=showReview;
+  } else {
+    fwd.textContent='Next →'; fwd.className='btn b-blue';
+    fwd.onclick=()=>navQ(1);
+  }
+  // dots
+  buildDots();
+  // flag btn
+  const fb=document.getElementById('flag-btn');
+  fb.textContent=flagged[i]?'🚩 Flagged':'🚩 Flag';
+  fb.className='q-tool-btn'+(flagged[i]?' active':'');
+  // ans count
+  document.getElementById('q-ans-count').textContent=Object.keys(answers).length+'/'+exam.questions.length+' answered';
+}
+
+function buildDots(){
+  const c=document.getElementById('q-dots');
+  c.innerHTML=exam.questions.map((_,i)=>{
+    let cls='q-dot';
+    if(i===currentQ) cls+=' cur';
+    else if(answers[i]!==undefined) cls+=' ok';
+    if(flagged[i]) cls+=' flag';
+    return `<button class="${cls}" onclick="renderQ(${i})">${i+1}</button>`;
+  }).join('');
+}
+
+function selectAns(qi,ci){
+  if(elimMode){ 
+    if(!elims[qi]) elims[qi]=new Set();
+    if(elims[qi].has(ci)) elims[qi].delete(ci); else elims[qi].add(ci);
+    renderQ(qi); return;
+  }
+  answers[qi]=ci; renderQ(qi);
+}
+function navQ(d){
+  const n=currentQ+d;
+  if(n>=0&&n<exam.questions.length) renderQ(n);
+}
+function toggleFlag(){ flagged[currentQ]=!flagged[currentQ]; renderQ(currentQ); }
+
+// ══════════════════════════════════════════════════════════════
+//  REVIEW
+// ══════════════════════════════════════════════════════════════
+function showReview(){
+  showScreen('s-review');
+  const list=document.getElementById('rev-list');
+  list.innerHTML=exam.questions.map((q,i)=>{
+    const answered=answers[i]!==undefined, fl=flagged[i];
+    const cls=fl?'flagged-q':answered?'answered':'';
+    const statusText=fl?'🚩 Flagged for review':answered?('Answered: '+LETTERS[answers[i]]):'⚠ Not answered';
+    const statusCls=fl?'fl':answered?'ok':'na';
+    return `<div class="rev-q ${cls}" onclick="goToQ(${i})">
+      <div class="rq-num">${i+1}</div>
+      <div class="rq-body">
+        <div style="font-size:13px;color:#1e293b;line-height:1.4">${q.stem.length>90?q.stem.slice(0,90)+'…':q.stem}</div>
+        <div class="rq-status ${statusCls}">${statusText}</div>
+      </div>
+      <span style="font-size:20px;flex-shrink:0">${answered?'✓':'○'}</span>
+    </div>`;
+  }).join('');
+}
+
+function goToQ(i){ currentQ=i; goToQuestions(); }
+
+// ══════════════════════════════════════════════════════════════
+//  WRITING
+// ══════════════════════════════════════════════════════════════
+function loadRef(i){
+  const p=exam.passages[i];
+  document.getElementById('ref-src-lbl').textContent=p.source+' — Reference';
+  document.getElementById('ref-ttl').textContent=p.title;
+  document.getElementById('ref-body').innerHTML=p.body.map(t=>`<p style="font-size:${zoomLevel/100*14}px;line-height:1.88;margin-bottom:14px;color:#1e293b">${t}</p>`).join('');
+  // tabs
+  document.getElementById('stab-inner').innerHTML=exam.passages.map((p2,j)=>
+    `<button class="stab${j===i?' on':''}" onclick="loadRef(${j})">${p2.source}: ${p2.title.slice(0,28)+'…'}</button>`
+  ).join('');
+}
+
+function updateWC(){
+  const txt=document.getElementById('essay').value.trim();
+  const wc=txt?txt.split(/\s+/).length:0;
+  const pill=document.getElementById('wc-pill');
+  pill.textContent='Words: '+wc;
+  pill.className=wc>=60?'ok':'low';
+  const sb=document.getElementById('submit-btn');
+  if(txt.length>30){ sb.style.cssText='background:#14532d;color:#fff;cursor:pointer'; }
+  else { sb.style.cssText='background:#9ca3af;color:#fff;cursor:default'; }
+}
+
+// ══════════════════════════════════════════════════════════════
+//  SUBMIT
+// ══════════════════════════════════════════════════════════════
+function confirmSubmit(){
+  const essay=document.getElementById('essay').value.trim();
+  if(essay.length<30) return;
+  const answered=Object.keys(answers).length;
+  const wc=essay?essay.split(/\s+/).length:0;
+  const unanswered=exam.questions.length-answered;
+  document.getElementById('confirm-stats').innerHTML=
+    `<div style="margin-bottom:6px"><strong>Part 1:</strong> ${answered} of ${exam.questions.length} questions answered${unanswered>0?` <span style="color:#dc2626">(${unanswered} not answered)</span>`:' ✓'}</div>`+
+    `<div><strong>Part 2:</strong> ${wc} words written ✓</div>`;
+  showScreen('s-confirm');
+}
+
+function finalSubmit(){
+  clearInterval(timerID);
+  showScreen('s-report');
+  buildReport();
+}
+
+// ══════════════════════════════════════════════════════════════
+//  REPORT
+// ══════════════════════════════════════════════════════════════
+function buildReport(){
+  const used=90*60-timeLeft;
+  const um=Math.floor(used/60), us=used%60;
+  const essay=document.getElementById('essay').value.trim();
+  const wc=essay?essay.split(/\s+/).length:0;
+  document.getElementById('rpt-exam-name').textContent='Exam '+exam.id+': '+exam.title+' — Score Report';
+  document.getElementById('rpt-meta').innerHTML=`<div>Time used: ${um}m ${us}s</div><div>Words written: ${wc}</div>`;
+  // MC
+  const mcScore=exam.questions.filter((_,i)=>answers[i]===exam.questions[i].correct).length;
+  document.getElementById('rs-mc').textContent=mcScore+' / '+exam.questions.length;
+  document.getElementById('rs-mc').style.color='#003087';
+  // MC review
+  document.getElementById('rpt-mc-review').innerHTML=exam.questions.map((q,i)=>{
+    const chosen=answers[i], right=chosen===q.correct;
+    const cls=chosen===undefined?'sk':right?'cr':'wr';
+    const icon=chosen===undefined?'○':right?'✓':'✗';
+    return `<div class="ans-item ${cls}">
+      <div class="ans-num">${i+1}</div>
+      <div style="flex:1">
+        <div style="font-size:13px;color:#1e293b;line-height:1.4;margin-bottom:4px">${q.stem}</div>
+        <div style="display:flex;gap:16px;font-size:12px;flex-wrap:wrap">
+          <span>Your answer: <strong style="color:${right?'#14532d':chosen===undefined?'#555':'#dc2626'}">${chosen!==undefined?LETTERS[chosen]:'Not answered'}</strong></span>
+          ${!right&&chosen!==undefined?`<span style="color:#14532d">Correct: <strong>${LETTERS[q.correct]}</strong> — ${q.choices[q.correct]}</span>`:''}
+        </div>
+      </div>
+      <span style="font-size:18px;flex-shrink:0;margin-left:8px">${icon}</span>
+    </div>`;
+  }).join('');
+  if(!essay){ document.getElementById('score-my-btn').style.display='none'; }
+  document.getElementById('rs-tot').textContent='—';
+}
+
+// ══════════════════════════════════════════════════════════════
+//  LOCAL NJSLA RUBRIC SCORER  (fully offline — no API needed)
+// ══════════════════════════════════════════════════════════════
+const STOP_WORDS = new Set(['a','an','the','and','or','but','in','on','at','to','for','of',
+  'with','is','are','was','were','be','been','have','has','had','do','does','did','will',
+  'would','could','should','may','might','can','this','that','these','those','it','its',
+  'they','them','their','we','our','you','your','he','she','his','her','not','no','so',
+  'up','as','if','by','from','into','about','more','very','all','also','just','than',
+  'then','when','where','which','who','how','what','there','here','some','many','each',
+  'one','two','three','other','new','get','make','even','only','over','after','before',
+  'while','both','through','back','still','come','look','work','well','down','way','day']);
+
+function extractKeyTerms(passage){
+  const counts={};
+  passage.body.forEach(para=>{
+    para.toLowerCase().replace(/[^a-z\s]/g,'').split(/\s+/).forEach(w=>{
+      if(w.length>=4&&!STOP_WORDS.has(w)) counts[w]=(counts[w]||0)+1;
+    });
+  });
+  return Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,24).map(e=>e[0]);
+}
+
+function scoreOrganization(paragraphs, wc, lower){
+  const TRANSITIONS=['first','second','third','also','another','additionally','furthermore',
+    'in addition','next','then','finally','last','lastly','however','moreover','besides',
+    'for example','such as','for instance','in fact','most importantly','on the other hand',
+    'similarly','in contrast','instead'];
+  const CONCLUSION=['in conclusion','to summarize','overall','in summary','as you can see',
+    'these examples show','now you know','as we have seen','it is clear','to sum up',
+    'in the end','all in all','clearly','therefore we can see','as shown'];
+  const transCt = TRANSITIONS.filter(t=>lower.includes(t)).length;
+  const hasConcl = CONCLUSION.some(w=>lower.includes(w))||
+    (paragraphs.length>=2&&paragraphs[paragraphs.length-1].trim().split(/\s+/).length>=12);
+  const hasIntro = paragraphs.length>=1&&paragraphs[0].trim().split(/\s+/).length>=10;
+  const multiPara= paragraphs.length>=3;
+
+  if(wc<15) return {score:0,fb:'The response is too short to evaluate organization. Write at least 3 paragraphs.'};
+  if(hasIntro&&hasConcl&&multiPara&&transCt>=3&&wc>=100)
+    return {score:4,fb:`Excellent organization! Clear introduction, ${paragraphs.length} organized paragraphs, strong conclusion, and ${transCt} transition words. Your reader can easily follow your ideas from beginning to end.`};
+  if(hasIntro&&hasConcl&&paragraphs.length>=2&&transCt>=1&&wc>=65)
+    return {score:3,fb:`Good organization — you have an introduction, body, and conclusion. You used ${transCt} transition word(s). ${transCt<3?'Try adding more transitions like "also," "another," or "finally" to connect ideas even more smoothly.':''}`};
+  if((hasIntro||hasConcl)&&paragraphs.length>=2)
+    return {score:2,fb:`Your writing has some structure, but ${!hasIntro?'the introduction needs to clearly name the topic. ':''}${!hasConcl?'add a conclusion that wraps up your ideas. ':''}${transCt===0?'Use transition words like "also," "another," or "in addition" to connect your paragraphs.':''}`};
+  return {score:1,fb:'Your writing needs more organization. Try writing an introduction (first paragraph), body paragraphs with facts, and a conclusion (final paragraph). Use "also," "another," and "finally" to connect your ideas.'};
+}
+
+function scoreEvidence(lower, wc, src0terms, src1terms){
+  const SIGNALS=['according to','the passage','source 1','source 2','the article','the author',
+    'in the text','it says','we learn','the first source','the second source',
+    'the first passage','the second passage','the reading','in the reading','both sources'];
+  const s0hits=src0terms.filter(t=>lower.includes(t));
+  const s1hits=src1terms.filter(t=>lower.includes(t));
+  const sigCt =SIGNALS.filter(p=>lower.includes(p)).length;
+
+  if(wc<15||( s0hits.length===0&&s1hits.length===0))
+    return {score:0,fb:'No specific details from either source were found. Include facts from BOTH passages — details like key vocabulary words, names, or specific information from each source.'};
+  if(s0hits.length>=4&&s1hits.length>=3&&sigCt>=1)
+    return {score:4,fb:`Outstanding evidence use! You drew thoroughly from both sources (Source 1 terms: ${s0hits.slice(0,4).join(', ')}; Source 2 terms: ${s1hits.slice(0,4).join(', ')}) and used ${sigCt} signal phrase(s) like "According to..." to introduce your evidence clearly.`};
+  if(s0hits.length>=2&&s1hits.length>=2)
+    return {score:3,fb:`Good evidence use — you referenced both sources (Source 1: ${s0hits.slice(0,3).join(', ')}; Source 2: ${s1hits.slice(0,3).join(', ')}). ${sigCt===0?'Try using a signal phrase like "According to Source 1..." to introduce your evidence even more clearly.':''}`};
+  if(s0hits.length>=1&&s1hits.length>=1)
+    return {score:2,fb:`You mentioned ideas from both sources, but include more specific facts and details. Source 1 terms found: ${s0hits.slice(0,2).join(', ')}. Source 2 terms found: ${s1hits.slice(0,2).join(', ')}. Add more key vocabulary and details from each passage.`};
+  const found=s0hits.length>s1hits.length?{which:'Source 1',terms:s0hits,missing:'Source 2'}:{which:'Source 2',terms:s1hits,missing:'Source 1'};
+  return {score:1,fb:`Your writing only references ${found.which} (terms: ${found.terms.slice(0,2).join(', ')}). The NJSLA requires details from BOTH sources. Add facts and vocabulary from ${found.missing} to earn a higher score.`};
+}
+
+function scoreDevelopment(lower, wc, sentences, src0terms, src1terms){
+  const ELAB=['because','this means','this shows','this is important','this helps','which means',
+    'so that','in order to','this is why','this allows','this makes','without this','as a result',
+    'that is why','this explains','this is how','this proves','this tells us'];
+  const WHY=['important','helpful','necessary','essential','useful','significant','benefit',
+    'difference','effect','impact','reason','purpose','allows','enables','gives'];
+  const elabCt=ELAB.filter(w=>lower.includes(w)).length;
+  const whyCt =WHY.filter(w=>lower.includes(w)).length;
+  const vocab =[...src0terms.slice(0,10),...src1terms.slice(0,10)].filter(t=>lower.includes(t)).length;
+  const avgLen=sentences.length>0?wc/sentences.length:0;
+  const longS =sentences.filter(s=>s.trim().split(/\s+/).length>=10).length;
+
+  if(wc<15) return {score:0,fb:'Not enough writing to evaluate development.'};
+  if(elabCt>=5&&vocab>=7&&wc>=100&&avgLen>=9&&whyCt>=2)
+    return {score:4,fb:`Outstanding development! You used ${elabCt} elaboration phrases (like "because" and "this means"), ${vocab} passage vocabulary terms, and ${longS} complex sentence(s) (avg. ${Math.round(avgLen)} words/sentence). You clearly explain WHY your evidence matters — not just what it is.`};
+  if(elabCt>=3&&vocab>=4&&wc>=75&&avgLen>=7)
+    return {score:3,fb:`Good development — you used ${elabCt} elaboration words and ${vocab} vocabulary terms from the passages. You explain your ideas, not just list facts. ${elabCt<4?'Add one or two more "because" or "this means" statements to reach score 4.':''}`};
+  if((elabCt>=1||whyCt>=1)&&wc>=40)
+    return {score:2,fb:`Your writing begins to explain ideas. You used ${elabCt} elaboration word(s) and ${vocab} passage term(s). After each fact, try explaining WHY it is important using "because," "this means," or "this shows." Use more vocabulary words from the passages.`};
+  return {score:1,fb:'Your writing states facts but does not yet explain them. After every fact, add a sentence that says WHY it matters. For example: "Service dogs help blind people. This means they can travel on their own, which is very important for their independence."'};
+}
+
+function scoreConventions(essay, wc){
+  if(wc<5) return {score:0,fb:'No response to evaluate.'};
+  const goodCaps=(essay.match(/[.!?]\s+[A-Z]/g)||[]).length;
+  const totalPunct=Math.max((essay.match(/[.!?]/g)||[]).length,1);
+  const punctRatio=goodCaps/totalPunct;
+  const badI=(essay.match(/(?<![a-z])i(?![a-z])/g)||[]).length-(essay.match(/\bI\b/g)||[]).length;
+  // runs-on: sentence fragments over 55 words without punctuation
+  const runOns=essay.split(/[.!?]/).filter(s=>s.trim().split(/\s+/).length>55).length;
+  const lowerStarts=(essay.match(/[.!?]\s+[a-z]/g)||[]).length;
+  const errors=(badI>2?1:0)+(runOns>2?1:0)+(lowerStarts>3?1:0)+(punctRatio<0.3&&wc>40?1:0);
+
+  if(errors>=3)
+    return {score:0,fb:`There are frequent errors in punctuation and capitalization that interfere with meaning. Every sentence must start with a capital letter and end with a period. Always capitalize "I."`};
+  if(errors<=1&&punctRatio>=0.5&&badI<=1&&lowerStarts<=1&&runOns===0)
+    return {score:2,fb:`Your spelling, capitalization, and punctuation are well-controlled and do not get in the way of your meaning. ${badI===0?'You correctly capitalized "I" throughout.':'Just remember to always capitalize "I."'} Well done!`};
+  const tips=[];
+  if(badI>1) tips.push(`capitalize "I" (found ${badI} lowercase instance(s))`);
+  if(lowerStarts>1) tips.push('start every sentence with a capital letter');
+  if(runOns>0) tips.push('break long sentences into shorter ones with periods');
+  return {score:1,fb:`Your writing is mostly understandable, but there are some convention errors. Remember to: ${tips.length?tips.join(', ')+'.':'check punctuation and capitalization.'}`};
+}
+
+function scoreEssay(){
+  const essay=document.getElementById('essay').value.trim();
+  if(!essay){
+    document.getElementById('score-area').innerHTML='<div class="err-strip">No essay found. Go back to Part 2 and write your response first.</div>';
+    return;
+  }
+  document.getElementById('score-my-btn').style.display='none';
+  const lower    =essay.toLowerCase();
+  const wc       =essay.trim().split(/\s+/).length;
+  const sentences=essay.split(/(?<=[.!?])\s+/).filter(s=>s.trim().length>4);
+  const paragraphs=essay.split(/\n\s*\n|\n/).filter(p=>p.trim().split(/\s+/).length>=5);
+  const src0terms=extractKeyTerms(exam.passages[0]);
+  const src1terms=extractKeyTerms(exam.passages[1]);
+
+  const org =scoreOrganization(paragraphs,wc,lower);
+  const evid=scoreEvidence(lower,wc,src0terms,src1terms);
+  const dev =scoreDevelopment(lower,wc,sentences,src0terms,src1terms);
+  const conv=scoreConventions(essay,wc);
+  const total=org.score+evid.score+dev.score+conv.score;
+
+  // build strengths/grow
+  const strengths=[], grow=[];
+  if(org.score>=3)  strengths.push('Well-organized writing with a clear introduction, body, and conclusion.');
+  else              grow.push('Organize with 3+ paragraphs: introduction, body with facts, and a conclusion.');
+  if(evid.score>=3) strengths.push('You used details from both sources to support your ideas — exactly what NJSLA requires.');
+  else              grow.push('Include specific facts from BOTH sources. Use "According to Source 1…" or "Source 2 explains…"');
+  if(dev.score>=3)  strengths.push('You explained your ideas with elaboration words, not just listing facts.');
+  else              grow.push('After each fact, add "because," "this means," or "this shows" to explain WHY it matters.');
+  if(conv.score===2)strengths.push('Spelling, capitalization, and punctuation are strong and clear.');
+  else if(conv.score===0) grow.push('Check every sentence starts with a capital letter and ends with a period. Always capitalize "I."');
+  if(strengths.length<2) strengths.push(wc>=80?'Your response is detailed and covers a good amount of information.':'You made an effort to respond to the writing prompt.');
+  if(grow.length<2)      grow.push('Re-read your essay and ask: does every paragraph connect back to the main topic?');
+
+  let overall='';
+  if(total>=12) overall='Great work! Your informational article is well-organized, uses evidence from both sources, and explains your ideas clearly. You are on track for an Advanced or Proficient score. Keep it up!';
+  else if(total>=8) overall='You are doing a solid job! Your writing shows real understanding of the topic. To reach Proficient, focus on adding more details from both sources and explaining WHY your facts are important using words like "because" and "this means."';
+  else if(total>=5) overall='Good start! You have some ideas from the passages in your writing. Work on organizing your paragraphs clearly (introduction, body, conclusion) and explaining your facts — not just listing them.';
+  else overall='Keep practicing! Aim for at least 3 paragraphs: start by introducing your topic, then use facts from both sources, then write a conclusion. After each fact, say WHY it is important. You can do it!';
+
+  renderScoreReport({
+    org_score:org.score, org_feedback:org.fb,
+    evidence_score:evid.score, evidence_feedback:evid.fb,
+    development_score:dev.score, development_feedback:dev.fb,
+    conventions_score:conv.score, conventions_feedback:conv.fb,
+    strengths:strengths.slice(0,2), grow:grow.slice(0,2), overall
+  });
+}
+
+function renderScoreReport(d){
+  const total=d.org_score+d.evidence_score+d.development_score+d.conventions_score;
+  const mcScore=exam.questions.filter((_,i)=>answers[i]===exam.questions[i].correct).length;
+  const grandTotal=mcScore+total;
+  let lvl;
+  if(grandTotal>=16) lvl={label:"Advanced",color:"#14532d",bg:"#f0fdf4",border:"#86efac"};
+  else if(grandTotal>=12) lvl={label:"Proficient",color:"#1d4ed8",bg:"#eff6ff",border:"#93c5fd"};
+  else if(grandTotal>=8)  lvl={label:"Approaching Proficient",color:"#d97706",bg:"#fffbeb",border:"#fcd34d"};
+  else                    lvl={label:"Below Proficient",color:"#dc2626",bg:"#fff1f2",border:"#fca5a5"};
+  document.getElementById('rs-wr').textContent=total+' / 14';
+  document.getElementById('rs-wr').style.color=lvl.color;
+  document.getElementById('rs-wr-sub').textContent=lvl.label;
+  document.getElementById('rs-tot').textContent=grandTotal+' / '+(exam.questions.length+14);
+  document.getElementById('rs-tot').style.color=lvl.color;
+  allScores[exam.id]={mc:mcScore,writing:total};
+  buildSelector();
+  const dims=[
+    {label:"Organization",score:d.org_score,max:4,fb:d.org_feedback,color:"#1d4ed8",
+     desc:['0 — No attempt','1 — Minimal','2 — Inconsistent','3 — Adequate','4 — Effective']},
+    {label:"Evidence Use",score:d.evidence_score,max:4,fb:d.evidence_feedback,color:"#7c3aed",
+     desc:['0 — None','1 — Minimal','2 — Partial','3 — Adequate','4 — Thorough']},
+    {label:"Development",score:d.development_score,max:4,fb:d.development_feedback,color:"#0891b2",
+     desc:['0 — None','1 — Minimal','2 — Limited','3 — Adequate','4 — Full']},
+    {label:"Grammar & Conventions",score:d.conventions_score,max:2,fb:d.conventions_feedback,color:"#065f46",
+     desc:['0 — Many errors','1 — Some errors','2 — Few/no errors']}
+  ];
+  document.getElementById('score-area').innerHTML=`
+    <div class="lvl-badge" style="background:${lvl.bg};border-color:${lvl.border}">
+      <div>
+        <div style="font-size:10px;color:${lvl.color};font-weight:700;letter-spacing:1px;text-transform:uppercase">Writing Performance Level</div>
+        <div style="font-size:19px;font-weight:900;color:${lvl.color}">${lvl.label}</div>
+      </div>
+      <div style="text-align:center"><div style="font-size:30px;font-weight:900;color:${lvl.color};line-height:1">${total}</div><div style="font-size:10px;color:${lvl.color};opacity:.8">out of 14</div></div>
+    </div>
+    ${dims.map(dim=>`<div class="dim-block">
+      <div class="dim-hdr">
+        <div style="font-weight:700;color:#1e293b;font-size:13px">${dim.label}</div>
+        <span style="background:${dim.color};color:#fff;font-weight:800;font-size:12px;padding:3px 10px;border-radius:20px">${dim.score} / ${dim.max}</span>
+      </div>
+      <div class="score-bar-wrap">
+        <div class="sbar-bg"><div class="sbar-fill" style="width:${Math.round(dim.score/dim.max*100)}%;background:${dim.color}"></div></div>
+        <span style="font-size:14px;font-weight:800;color:${dim.color};min-width:34px;text-align:right">${dim.score}/${dim.max}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin:6px 0 10px">
+        ${dim.desc.map((label,idx)=>`<span style="font-size:9px;text-align:center;flex:1;color:${idx===dim.score?dim.color:'#bbb'};font-weight:${idx===dim.score?800:400};line-height:1.3">${label}</span>`).join('')}
+      </div>
+      <div class="dim-fbk">${dim.fb}</div>
+    </div>`).join('')}
+    <div class="sg-row">
+      <div class="sg-box" style="background:#f0fdf4;border-color:#86efac">
+        <div class="sg-title" style="color:#14532d">✓ Strengths</div>
+        ${d.strengths.map(s=>`<div class="sg-item" style="color:#166534"><span>+</span><span>${s}</span></div>`).join('')}
+      </div>
+      <div class="sg-box" style="background:#fffbeb;border-color:#fcd34d">
+        <div class="sg-title" style="color:#92400e">→ Areas to Grow</div>
+        ${d.grow.map(g=>`<div class="sg-item" style="color:#78350f"><span>→</span><span>${g}</span></div>`).join('')}
+      </div>
+    </div>
+    <div class="overall-box">
+      <div style="font-weight:700;color:#1d4ed8;font-size:12px;margin-bottom:5px">Scorer's Comments</div>
+      <p style="font-size:13px;color:#1e3a8a;line-height:1.65;margin:0">${d.overall}</p>
+    </div>
+    <div style="margin-top:12px;background:#f0f6ff;border:1px solid #c8d8ea;border-radius:8px;padding:10px 14px;font-size:11px;color:#666;text-align:center">
+      ✅ Scored locally using NJSLA Grade 3 rubric — no internet required. Scoring analyzes organization, passage vocabulary use, elaboration language, and conventions.
+    </div>`;
+}
+
+// ══════════════════════════════════════════════════════════════
+//  TOOLS
+// ══════════════════════════════════════════════════════════════
+function toggleNotepad(){
+  const np=document.getElementById('notepad-float');
+  const btn=document.getElementById('btn-note');
+  const h=np.classList.toggle('hidden');
+  btn.classList.toggle('on',!h);
+}
+function toggleElim(){
+  elimMode=!elimMode;
+  document.getElementById('btn-elim').classList.toggle('on',elimMode);
+  if(document.getElementById('s-qs').classList.contains('hidden')===false) renderQ(currentQ);
+}
+function toggleZoom(){
+  zoomVisible=!zoomVisible;
+  document.getElementById('zoom-ctrl').classList.toggle('hidden',!zoomVisible);
+}
+function zoom(d){
+  zoomLevel=Math.max(80,Math.min(150,zoomLevel+d*10));
+  document.getElementById('zoom-pct').textContent=zoomLevel+'%';
+  if(!document.getElementById('s-qs').classList.contains('hidden')) renderQ(currentQ);
+  else if(!document.getElementById('s-write').classList.contains('hidden')) loadRef(0);
+}
+function toggleLinereader(){
+  lineMode=!lineMode;
+  const lr=document.getElementById('line-reader');
+  const btn=document.getElementById('btn-line');
+  lr.classList.toggle('hidden',!lineMode);
+  btn.classList.toggle('on',lineMode);
+  if(lineMode){
+    document.addEventListener('mousemove',moveLineReader);
+  } else {
+    document.removeEventListener('mousemove',moveLineReader);
+  }
+}
+function moveLineReader(e){
+  document.getElementById('line-reader').style.top=(e.clientY-18)+'px';
+}
+
+// ══════════════════════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════════════════════
+buildSelector();
+</script>
+</body>
+</html>
