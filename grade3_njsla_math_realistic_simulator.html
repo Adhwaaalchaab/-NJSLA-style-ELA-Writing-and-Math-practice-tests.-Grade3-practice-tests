@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Grade 3 NJSLA-Style Math Practice Simulator</title>
+<style>
+body{font-family:Arial,Helvetica,sans-serif;background:#eee;margin:0;color:#111}
+.topbar{background:#1f4e79;color:white;padding:10px 18px;display:flex;justify-content:space-between;align-items:center}
+.container{max-width:1100px;margin:18px auto;background:white;padding:22px;border:1px solid #bbb;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.screen{display:none}.active{display:block}
+h1,h2,h3{color:#1f4e79}
+button{background:#1f4e79;color:white;border:0;padding:10px 16px;margin:8px 5px 0 0;font-size:15px;cursor:pointer}
+button.secondary{background:#555}
+.question{border:1px solid #aaa;padding:16px;margin:16px 0;font-size:18px;line-height:1.5}
+.choice{display:block;margin:8px 0;padding:8px;background:#f7f7f7;border:1px solid #ccc}
+input[type=text],input[type=number]{font-size:17px;padding:6px;width:120px}
+select{font-size:16px;padding:7px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.dragitem,.dropzone{border:1px solid #777;padding:10px;margin:8px;background:#f8f8f8;min-height:28px}
+.dragitem{cursor:grab;background:#eaf3fb}
+.dropzone{background:#fff}
+.correct{background:#e5f6e5}.wrong{background:#ffe8e8}
+.small{font-size:14px;color:#333}
+.timer{font-weight:bold;font-size:20px}
+.scorecard{border:2px solid #1f4e79;background:#eef5fb;padding:15px;margin:15px 0}
+table{width:100%;border-collapse:collapse;margin-top:10px}td,th{border:1px solid #999;padding:8px;text-align:left}
+</style>
+</head>
+<body>
+<div class="topbar"><div>Grade 3 NJSLA-Style Math Practice</div><div class="timer" id="timer">60:00</div></div>
+<div class="container">
+
+<div id="start" class="screen active">
+<h1>Math Practice Simulator</h1>
+<p>This practice test includes several NJSLA-style item types: multiple choice, multi-select, drag-and-drop matching, and multi-step problems.</p>
+<p class="small">This is an original practice simulator, not an official NJSLA test and not a copy of secure test items.</p>
+<h3>Choose a form</h3>
+<select id="formSelect"></select><br>
+<button onclick="startTest()">Start Test</button>
+</div>
+
+<div id="test" class="screen">
+<h2 id="formTitle"></h2>
+<div id="questions"></div>
+<button onclick="submitTest()">Submit Test</button>
+<button class="secondary" onclick="show('start')">Back</button>
+</div>
+
+<div id="results" class="screen">
+<h2>Results</h2>
+<div id="scoreBox"></div>
+<button onclick="downloadResults()">Download Results</button>
+<button onclick="location.reload()">Take Another Form</button>
+</div>
+
+</div>
+
+<script>
+const FORMS=[
+{title:"Form 1: Operations and Word Problems",time:60,questions:[
+{type:"mc",pts:1,q:"Which equation has the same value as 6 × 4?",choices:["6 + 4","6 + 6 + 6 + 6","4 + 4 + 4","6 − 4"],answer:1},
+{type:"ms",pts:2,q:"Select TWO expressions equal to 24.",choices:["3 × 8","4 × 5","6 × 4","20 + 3","30 − 4"],answer:[0,2]},
+{type:"num",pts:1,q:"A class has 37 pencils. The teacher adds 28 more. How many pencils are there now?",answer:65},
+{type:"drag",pts:3,q:"Drag each multiplication expression to the matching product.",left:["5 × 3","7 × 2","4 × 6"],right:["14","15","24"],answer:{"5 × 3":"15","7 × 2":"14","4 × 6":"24"}},
+{type:"multi",pts:3,q:"Lina has 4 bags. Each bag has 6 stickers. She gives 5 stickers away. How many stickers does Lina have left?",parts:[
+{label:"Step 1: How many stickers did Lina have at first?",answer:24},
+{label:"Step 2: How many stickers are left?",answer:19}
+],final:19}
+]},
+{title:"Form 2: Place Value, Rounding, and Area",time:60,questions:[
+{type:"mc",pts:1,q:"What is 432 rounded to the nearest hundred?",choices:["400","430","500","300"],answer:0},
+{type:"ms",pts:2,q:"Select TWO numbers that round to 70 when rounded to the nearest ten.",choices:["64","65","71","75","84"],answer:[1,2]},
+{type:"num",pts:1,q:"A rectangle has 5 rows of squares and 7 squares in each row. What is the area?",answer:35},
+{type:"drag",pts:3,q:"Match each number to its expanded form.",left:["236","408","571"],right:["200 + 30 + 6","400 + 8","500 + 70 + 1"],answer:{"236":"200 + 30 + 6","408":"400 + 8","571":"500 + 70 + 1"}},
+{type:"multi",pts:3,q:"A farmer has 48 apples. He packs them equally into 6 bags. Then he sells 3 bags. How many apples are left?",parts:[
+{label:"Step 1: How many apples are in each bag?",answer:8},
+{label:"Step 2: How many bags are left?",answer:3},
+{label:"Step 3: How many apples are left?",answer:24}
+],final:24}
+]},
+{title:"Form 3: Fractions, Time, and Measurement",time:60,questions:[
+{type:"mc",pts:1,q:"Which fraction shows one part out of four equal parts?",choices:["1/2","1/3","1/4","4/1"],answer:2},
+{type:"ms",pts:2,q:"Select TWO fractions equal to one whole.",choices:["2/2","3/4","4/4","1/3","2/3"],answer:[0,2]},
+{type:"num",pts:1,q:"A movie starts at 2:15 and ends at 3:00. How many minutes long is the movie?",answer:45},
+{type:"drag",pts:3,q:"Match each measurement to the best unit.",left:["Length of a pencil","Weight of a watermelon","Amount of water in a bottle"],right:["centimeters","kilograms","liters"],answer:{"Length of a pencil":"centimeters","Weight of a watermelon":"kilograms","Amount of water in a bottle":"liters"}},
+{type:"multi",pts:3,q:"Sara reads 12 pages on Monday, 15 pages on Tuesday, and 18 pages on Wednesday. She wants to read 60 pages total. How many more pages does she need to read?",parts:[
+{label:"Step 1: How many pages did she read in three days?",answer:45},
+{label:"Step 2: How many more pages does she need?",answer:15}
+],final:15}
+]}
+];
+
+let current=null,timer=null,timeLeft=3600,lastResults="";
+
+function init(){
+ const s=document.getElementById("formSelect");
+ FORMS.forEach((f,i)=>{let o=document.createElement("option");o.value=i;o.textContent=f.title;s.appendChild(o);});
+}
+window.onload=init;
+
+function show(id){
+ document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));
+ document.getElementById(id).classList.add("active");
+}
+
+function startTest(){
+ current=FORMS[parseInt(document.getElementById("formSelect").value)];
+ document.getElementById("formTitle").textContent=current.title;
+ renderQuestions();
+ timeLeft=current.time*60;
+ updateTimer();
+ if(timer) clearInterval(timer);
+ timer=setInterval(()=>{timeLeft--;updateTimer();if(timeLeft<=0){clearInterval(timer);submitTest();}},1000);
+ show("test");
+}
+
+function updateTimer(){
+ let m=Math.floor(timeLeft/60),s=timeLeft%60;
+ document.getElementById("timer").textContent=String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
+}
+
+function renderQuestions(){
+ let html="";
+ current.questions.forEach((q,i)=>{
+  html+=`<div class="question" id="qwrap${i}"><b>Question ${i+1}</b> <span class="small">(${q.pts} point${q.pts>1?"s":""})</span><p>${q.q}</p>`;
+  if(q.type==="mc"){
+    q.choices.forEach((c,j)=>html+=`<label class="choice"><input type="radio" name="q${i}" value="${j}"> ${c}</label>`);
+  } else if(q.type==="ms"){
+    q.choices.forEach((c,j)=>html+=`<label class="choice"><input type="checkbox" name="q${i}" value="${j}"> ${c}</label>`);
+  } else if(q.type==="num"){
+    html+=`<input type="number" id="q${i}" placeholder="answer">`;
+  } else if(q.type==="drag"){
+    html+=`<div class="grid"><div><b>Drag these:</b>`;
+    q.left.forEach(item=>html+=`<div class="dragitem" draggable="true" ondragstart="drag(event)" id="drag_${i}_${item.replaceAll(' ','_').replaceAll('×','x')}">${item}</div>`);
+    html+=`</div><div><b>Drop beside answer:</b>`;
+    q.right.forEach(r=>html+=`<div class="dropzone" ondrop="drop(event)" ondragover="allowDrop(event)" data-q="${i}" data-target="${r}">${r}: </div>`);
+    html+=`</div></div>`;
+  } else if(q.type==="multi"){
+    q.parts.forEach((p,j)=>html+=`<p>${p.label}<br><input type="number" id="q${i}_${j}" placeholder="answer"></p>`);
+    html+=`<p><b>Final answer:</b><br><input type="number" id="q${i}_final" placeholder="answer"></p>`;
+  }
+  html+=`<div id="fb${i}" class="small"></div></div>`;
+ });
+ document.getElementById("questions").innerHTML=html;
+}
+
+function allowDrop(ev){ev.preventDefault();}
+function drag(ev){ev.dataTransfer.setData("text",ev.target.id);}
+function drop(ev){
+ ev.preventDefault();
+ const id=ev.dataTransfer.getData("text");
+ const item=document.getElementById(id);
+ ev.currentTarget.appendChild(item);
+}
+
+function arraysEqual(a,b){
+ if(a.length!==b.length)return false;
+ a=[...a].sort(); b=[...b].sort();
+ return a.every((v,i)=>v===b[i]);
+}
+
+function getDragScore(q,i){
+ let score=0, details=[];
+ document.querySelectorAll(`.dropzone[data-q="${i}"]`).forEach(zone=>{
+   const target=zone.dataset.target;
+   const child=[...zone.children].find(x=>x.classList.contains("dragitem"));
+   if(child){
+     const item=child.textContent.trim();
+     if(q.answer[item]===target){score++; details.push(`${item} → ${target}: correct`);}
+     else details.push(`${item} → ${target}: incorrect`);
+   }
+ });
+ return {score,details};
+}
+
+function submitTest(){
+ if(timer) clearInterval(timer);
+ let earned=0,total=0,report=[];
+ current.questions.forEach((q,i)=>{
+   total+=q.pts; let s=0; let note="";
+   if(q.type==="mc"){
+     const checked=document.querySelector(`input[name="q${i}"]:checked`);
+     if(checked && parseInt(checked.value)===q.answer)s=q.pts;
+     note=`Q${i+1}: ${s}/${q.pts}`;
+   } else if(q.type==="ms"){
+     const vals=[...document.querySelectorAll(`input[name="q${i}"]:checked`)].map(x=>parseInt(x.value));
+     if(arraysEqual(vals,q.answer))s=q.pts;
+     else {
+       const correctChosen=vals.filter(v=>q.answer.includes(v)).length;
+       const wrongChosen=vals.filter(v=>!q.answer.includes(v)).length;
+       s=Math.max(0,Math.min(q.pts,correctChosen-wrongChosen));
+     }
+     note=`Q${i+1}: ${s}/${q.pts}`;
+   } else if(q.type==="num"){
+     const val=parseInt(document.getElementById(`q${i}`).value);
+     if(val===q.answer)s=q.pts;
+     note=`Q${i+1}: ${s}/${q.pts}. Correct answer: ${q.answer}`;
+   } else if(q.type==="drag"){
+     const ds=getDragScore(q,i); s=ds.score;
+     note=`Q${i+1}: ${s}/${q.pts}. ${ds.details.join("; ")}`;
+   } else if(q.type==="multi"){
+     let partScore=0;
+     q.parts.forEach((p,j)=>{
+       const val=parseInt(document.getElementById(`q${i}_${j}`).value);
+       if(val===p.answer)partScore++;
+     });
+     const f=parseInt(document.getElementById(`q${i}_final`).value);
+     if(f===q.final)partScore++;
+     s=Math.min(q.pts,partScore);
+     note=`Q${i+1}: ${s}/${q.pts}. Final answer: ${q.final}`;
+   }
+   earned+=s; report.push(note);
+ });
+ const percent=Math.round(earned/total*100);
+ let level="Needs more practice";
+ if(percent>=85)level="Strong";
+ else if(percent>=70)level="On track";
+ else if(percent>=50)level="Developing";
+ lastResults=`${current.title}\nScore: ${earned}/${total} (${percent}%)\nLevel: ${level}\n\n${report.join("\n")}`;
+ document.getElementById("scoreBox").innerHTML=`<div class="scorecard"><h3>Final Score: ${earned}/${total} (${percent}%)</h3><p><b>Performance:</b> ${level}</p></div><h3>Question Feedback</h3><pre>${report.join("\n")}</pre>`;
+ show("results");
+}
+
+function downloadResults(){
+ const blob=new Blob([lastResults],{type:"text/plain"});
+ const link=document.createElement("a");
+ link.href=URL.createObjectURL(blob);
+ link.download="grade3_math_practice_score.txt";
+ link.click();
+}
+</script>
+</body>
+</html>

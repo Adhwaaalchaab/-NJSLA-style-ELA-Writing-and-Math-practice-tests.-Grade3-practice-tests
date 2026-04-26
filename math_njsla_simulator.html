@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Grade 3 NJSLA Math Practice Simulator</title>
+<style>
+body {font-family: Arial; background:#f2f2f2; margin:0;}
+.topbar {background:#1f4e79; color:white; padding:10px; display:flex; justify-content:space-between;}
+.container {max-width:1000px; margin:20px auto; background:white; padding:20px;}
+.screen {display:none;}
+.active {display:block;}
+button {background:#1f4e79; color:white; padding:10px; border:none; margin-top:10px;}
+.question {margin:20px 0; font-size:18px;}
+input {font-size:16px; padding:5px; width:80px;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+<div>Grade 3 Math Practice</div>
+<div id="timer">60:00</div>
+</div>
+
+<div class="container">
+
+<div id="start" class="screen active">
+<h2>Select Test</h2>
+<select id="testSelect"></select><br>
+<button onclick="startTest()">Start</button>
+</div>
+
+<div id="test" class="screen">
+<h2 id="title"></h2>
+<div id="questions"></div>
+<button onclick="submitTest()">Submit</button>
+</div>
+
+<div id="result" class="screen">
+<h2>Score</h2>
+<div id="score"></div>
+<button onclick="location.reload()">Try Another</button>
+</div>
+
+</div>
+
+<script>
+
+const TESTS = [
+{
+title:"Form 1",
+qs:[
+{q:"35 + 27 = ?", a:62},
+{q:"48 - 19 = ?", a:29},
+{q:"6 × 4 = ?", a:24},
+{q:"A box has 5 rows of 3 apples. How many apples?", a:15},
+{q:"Round 67 to nearest ten", a:70}
+]
+},
+{
+title:"Form 2",
+qs:[
+{q:"56 + 18 = ?", a:74},
+{q:"90 - 34 = ?", a:56},
+{q:"7 × 3 = ?", a:21},
+{q:"4 groups of 6 = ?", a:24},
+{q:"Round 43 to nearest ten", a:40}
+]
+},
+{
+title:"Form 3",
+qs:[
+{q:"22 + 39 = ?", a:61},
+{q:"80 - 45 = ?", a:35},
+{q:"5 × 5 = ?", a:25},
+{q:"There are 3 bags with 8 marbles each. Total?", a:24},
+{q:"Round 58 to nearest ten", a:60}
+]
+}
+];
+
+let current;
+
+function init(){
+let sel=document.getElementById("testSelect");
+TESTS.forEach((t,i)=>{
+let o=document.createElement("option");
+o.value=i;
+o.text=t.title;
+sel.appendChild(o);
+});
+}
+window.onload=init;
+
+function startTest(){
+current=TESTS[document.getElementById("testSelect").value];
+document.getElementById("title").innerText=current.title;
+let html="";
+current.qs.forEach((x,i)=>{
+html+=`<div class="question">${i+1}. ${x.q}<br><input id="q${i}"></div>`;
+});
+document.getElementById("questions").innerHTML=html;
+show("test");
+startTimer();
+}
+
+function show(id){
+document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+document.getElementById(id).classList.add("active");
+}
+
+let time=60*60;
+function startTimer(){
+setInterval(()=>{
+time--;
+let m=Math.floor(time/60), s=time%60;
+document.getElementById("timer").innerText=
+String(m).padStart(2,'0')+":"+String(s).padStart(2,'0');
+if(time<=0) submitTest();
+},1000);
+}
+
+function submitTest(){
+let score=0;
+current.qs.forEach((x,i)=>{
+let val=parseInt(document.getElementById("q"+i).value);
+if(val===x.a) score++;
+});
+let percent=Math.round((score/current.qs.length)*100);
+document.getElementById("score").innerHTML=
+`Correct: ${score}/${current.qs.length}<br>Score: ${percent}%`;
+show("result");
+}
+
+</script>
+
+</body>
+</html>

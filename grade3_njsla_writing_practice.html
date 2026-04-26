@@ -1,0 +1,242 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Grade 3 NJSLA-Style ELA Writing Practice</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f4f4f4;
+        margin: 0;
+        padding: 0;
+        color: #111;
+    }
+    .topbar {
+        background: #1f4e79;
+        color: white;
+        padding: 12px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 18px;
+    }
+    .container {
+        max-width: 1000px;
+        margin: 20px auto;
+        background: white;
+        padding: 25px;
+        border: 1px solid #ccc;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+    .screen { display: none; }
+    .active { display: block; }
+    h1, h2, h3 { color: #1f4e79; }
+    .passage {
+        border: 1px solid #999;
+        padding: 18px;
+        margin: 18px 0;
+        line-height: 1.7;
+        font-size: 18px;
+    }
+    .prompt {
+        border: 2px solid #1f4e79;
+        padding: 18px;
+        background: #eef5fb;
+        font-size: 18px;
+        line-height: 1.6;
+    }
+    textarea {
+        width: 100%;
+        height: 420px;
+        font-size: 18px;
+        line-height: 1.6;
+        padding: 12px;
+        box-sizing: border-box;
+    }
+    button {
+        background: #1f4e79;
+        color: white;
+        border: none;
+        padding: 12px 22px;
+        font-size: 16px;
+        cursor: pointer;
+        margin: 10px 6px 0 0;
+    }
+    button:hover { background: #163b5c; }
+    .small {
+        font-size: 14px;
+        color: #333;
+    }
+    .timer {
+        font-weight: bold;
+        font-size: 20px;
+    }
+    .warning {
+        color: #b00020;
+        font-weight: bold;
+    }
+    .review-box {
+        border: 1px solid #aaa;
+        padding: 12px;
+        background: #fafafa;
+        white-space: pre-wrap;
+        font-size: 17px;
+        line-height: 1.6;
+    }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+    <div>Grade 3 ELA-Writing Practice</div>
+    <div class="timer" id="timer">90:00</div>
+</div>
+
+<div class="container">
+
+<div id="screen1" class="screen active">
+    <h1>Directions</h1>
+    <p>You are about to begin a Grade 3 ELA-Writing practice test.</p>
+    <p>You will read two passages. Then you will write one response.</p>
+    <p>Your writing should answer the prompt and use details from both passages.</p>
+    <p>You will have <strong>90 minutes</strong>. A message will appear when 10 minutes remain.</p>
+    <p class="small">This is an original practice test. It is not an official NJSLA released item.</p>
+    <button onclick="startTest()">Begin Test</button>
+</div>
+
+<div id="screen2" class="screen">
+    <h2>Passage 1</h2>
+    <div class="passage">
+        <h3>The Empty Lot</h3>
+        <p>Every day, Ava walked past an empty lot on her way to school. The lot had dry dirt, broken sticks, and old paper on the ground. No one stopped there because it did not look useful.</p>
+        <p>One morning, Ava’s teacher told the class that they would start a project to improve a place in the neighborhood. Ava raised her hand and talked about the empty lot. She said it could become a small garden where people could enjoy flowers and vegetables.</p>
+        <p>On Saturday, Ava’s classmates came with gloves, small shovels, and bags for trash. First, they cleaned the lot. Then they planted seeds and watered the soil. Some students made signs reminding people to take care of the garden.</p>
+        <p>Weeks later, green plants filled the lot. Families stopped to look at the flowers. Later in the season, the class shared tomatoes and lettuce with neighbors. Ava smiled because the empty lot had become a place that helped many people.</p>
+    </div>
+
+    <h2>Passage 2</h2>
+    <div class="passage">
+        <h3>The Book Cart</h3>
+        <p>Ben loved to read, but he noticed that some children in his apartment building did not have many books at home. Some children wanted to read more, but they did not know where to find books they could keep for a few days.</p>
+        <p>Ben talked to his family about the problem. His sister suggested making a small book cart for the building lobby. Ben asked classmates to donate books they had already read. Soon, he had picture books, chapter books, and books about animals and space.</p>
+        <p>Ben placed the books on a cart with a sign that said, “Take a book. Return it when you are done.” Each week, he checked the cart and added new books. Sometimes he helped younger children choose a book they might enjoy.</p>
+        <p>After a month, more children in the building were reading. Some children even wrote short notes about their favorite books. Ben felt proud because a simple idea helped others learn and enjoy stories.</p>
+    </div>
+
+    <button onclick="showScreen(3)">Next</button>
+</div>
+
+<div id="screen3" class="screen">
+    <h2>Writing Prompt</h2>
+    <div class="prompt">
+        <p><strong>Write an essay explaining how Ava and Ben helped their communities.</strong></p>
+        <p>Use details from both passages to support your answer.</p>
+    </div>
+
+    <h3>Planning Notes</h3>
+    <p>You may type notes here before writing your response.</p>
+    <textarea id="notes" style="height:180px;" placeholder="Plan your answer here..."></textarea>
+
+    <button onclick="showScreen(4)">Go to Writing</button>
+    <button onclick="showScreen(2)">Back to Passages</button>
+</div>
+
+<div id="screen4" class="screen">
+    <h2>Student Response</h2>
+    <p>Write your essay in the box. Be sure to use details from both passages.</p>
+    <textarea id="response" placeholder="Type your essay here..."></textarea>
+    <br>
+    <button onclick="showScreen(5)">Review</button>
+    <button onclick="showScreen(3)">Back to Prompt</button>
+</div>
+
+<div id="screen5" class="screen">
+    <h2>Review Your Writing</h2>
+    <p>Check your response before submitting.</p>
+    <ul>
+        <li>Did you answer the prompt?</li>
+        <li>Did you use details from both passages?</li>
+        <li>Did you organize your writing with a beginning, middle, and ending?</li>
+        <li>Did you check spelling, capitalization, and punctuation?</li>
+    </ul>
+    <h3>Your Response</h3>
+    <div id="reviewText" class="review-box"></div>
+    <button onclick="showScreen(4)">Edit Response</button>
+    <button onclick="submitTest()">Submit Test</button>
+</div>
+
+<div id="screen6" class="screen">
+    <h2>Test Submitted</h2>
+    <p>Your practice test has been submitted.</p>
+    <button onclick="downloadResponse()">Download My Response</button>
+</div>
+
+</div>
+
+<script>
+let totalSeconds = 90 * 60;
+let timerStarted = false;
+let intervalId = null;
+let warned = false;
+
+function showScreen(num) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen' + num).classList.add('active');
+    if (num === 5) {
+        document.getElementById('reviewText').innerText =
+            document.getElementById('response').value || "(No response typed yet.)";
+    }
+}
+
+function startTest() {
+    showScreen(2);
+    if (!timerStarted) {
+        timerStarted = true;
+        intervalId = setInterval(updateTimer, 1000);
+    }
+}
+
+function updateTimer() {
+    totalSeconds--;
+    let minutes = Math.floor(totalSeconds / 60);
+    let seconds = totalSeconds % 60;
+    document.getElementById('timer').innerText =
+        String(minutes).padStart(2, '0') + ":" + String(seconds).padStart(2, '0');
+
+    if (totalSeconds === 10 * 60 && !warned) {
+        warned = true;
+        alert("You have 10 minutes remaining.");
+        document.getElementById('timer').classList.add('warning');
+    }
+
+    if (totalSeconds <= 0) {
+        clearInterval(intervalId);
+        alert("Time is up. Your test will now be submitted.");
+        submitTest();
+    }
+}
+
+function submitTest() {
+    clearInterval(intervalId);
+    showScreen(6);
+}
+
+function downloadResponse() {
+    const notes = document.getElementById('notes').value;
+    const response = document.getElementById('response').value;
+    const content =
+        "Grade 3 NJSLA-Style ELA-Writing Practice\n\n" +
+        "Planning Notes:\n" + notes + "\n\n" +
+        "Student Response:\n" + response + "\n";
+
+    const blob = new Blob([content], {type: "text/plain"});
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "grade3_writing_response.txt";
+    link.click();
+}
+</script>
+
+</body>
+</html>
