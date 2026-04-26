@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NJSLA Grade 3 Math — Practice Exam Generator</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:#eef2fb;min-height:100vh}
+.hidden{display:none!important}
+button{font-family:inherit}
+
+/* ── HEADER ── */
+#hdr{background:#00529b;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 20px;border-bottom:3px solid #f0c040;position:sticky;top:0;z-index:100;height:52px;flex-shrink:0}
+.hdr-left{display:flex;align-items:center;gap:12px}
+.nj-badge{background:#fff;color:#00529b;font-weight:900;font-size:13px;padding:3px 8px;border-radius:3px;letter-spacing:1px}
+.hdr-titles .ht1{font-size:12px;font-weight:700}
+.hdr-titles .ht2{font-size:10px;opacity:.8}
+.hdr-right{display:flex;align-items:center;gap:8px}
+.hdr-tool{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:5px;padding:4px 10px;font-size:11px;cursor:pointer;font-weight:600}
+.hdr-tool.on{background:#f0c040;color:#00529b}
+#timer-box{background:rgba(255,255,255,.15);border:2px solid rgba(255,255,255,.4);border-radius:7px;padding:4px 14px;font-family:'Courier New',monospace;font-size:17px;font-weight:700;letter-spacing:2px;color:#fff;min-width:88px;text-align:center}
+#timer-box.warn{background:#7f1d1d;border-color:#fca5a5;animation:pulse .8s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.7}}
+
+/* ── NOTEPAD ── */
+#notepad-float{position:fixed;right:16px;top:60px;width:280px;background:#fff;border:2px solid #00529b;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,80,.25);z-index:300;display:flex;flex-direction:column}
+.np-hdr{background:#00529b;color:#fff;padding:8px 14px;border-radius:8px 8px 0 0;display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:700}
+.np-hdr button{background:none;border:none;color:#fff;font-size:18px;cursor:pointer;line-height:1}
+#notepad-text{width:100%;height:180px;padding:10px;border:none;border-radius:0 0 8px 8px;resize:none;font-size:13px;line-height:1.6;outline:none}
+
+/* ── SCRATCH WORK ── */
+#scratch-float{position:fixed;left:16px;top:60px;width:280px;background:#fffde7;border:2px solid #f0c040;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.2);z-index:300;flex-direction:column}
+.sc-hdr{background:#f0c040;color:#00529b;padding:8px 14px;border-radius:8px 8px 0 0;display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:700}
+.sc-hdr button{background:none;border:none;color:#00529b;font-size:18px;cursor:pointer}
+#scratch-text{width:100%;height:180px;padding:10px;border:none;border-radius:0 0 8px 8px;resize:none;font-size:13px;background:#fffde7;outline:none}
+
+/* ── SELECTOR ── */
+#s-selector{min-height:100vh;background:linear-gradient(160deg,#001840 0%,#00529b 55%,#0072c6 100%);padding:32px 20px}
+.sel-hdr{text-align:center;color:#fff;margin-bottom:32px}
+.sel-hdr h1{font-size:26px;font-weight:900;margin-bottom:6px}
+.sel-hdr p{font-size:14px;opacity:.85}
+.exam-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px;max-width:1000px;margin:0 auto}
+.exam-card{background:#fff;border-radius:14px;padding:22px;cursor:pointer;border:3px solid transparent;transition:all .2s;position:relative}
+.exam-card:hover{border-color:#f0c040;transform:translateY(-2px);box-shadow:0 12px 32px rgba(0,0,80,.25)}
+.ec-num{position:absolute;top:14px;right:14px;width:34px;height:34px;border-radius:50%;background:#00529b;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px}
+.ec-domain{font-size:10px;color:#0072c6;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
+.ec-title{font-size:17px;font-weight:800;color:#1e293b;margin-bottom:5px}
+.ec-desc{font-size:13px;color:#64748b;line-height:1.5;margin-bottom:14px}
+.ec-tags{display:flex;gap:8px;flex-wrap:wrap}
+.ec-tag{background:#f0f4ff;color:#00529b;font-size:10px;font-weight:600;padding:3px 8px;border-radius:20px}
+.ec-done{background:#f0fdf4;border-color:#86efac!important}
+.ec-score-prev{margin-top:10px;font-size:12px;font-weight:700;color:#14532d}
+
+/* ── WELCOME ── */
+#s-welcome{min-height:calc(100vh - 52px);align-items:center;justify-content:center;padding:20px;background:linear-gradient(160deg,#001840 0%,#00529b 60%,#0072c6 100%)}
+.welcome-box{background:#fff;border-radius:16px;padding:40px;max-width:700px;width:100%;box-shadow:0 20px 60px rgba(0,0,80,.4)}
+.wlc-hero{display:flex;align-items:center;gap:14px;margin-bottom:24px}
+.wlc-logo{width:52px;height:52px;background:#00529b;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:20px;flex-shrink:0}
+.info-2col{background:#f0f6ff;border:1px solid #c8d8ea;border-radius:10px;padding:14px 18px;display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px;color:#444;margin-bottom:18px}
+.dir-ul{color:#4a5568;font-size:14px;line-height:2.1;padding-left:20px;margin-bottom:18px}
+.warn-strip{background:#fffbeb;border:1px solid #f0c040;border-radius:8px;padding:10px 14px;font-size:13px;color:#78350f;margin-bottom:22px}
+.ref-strip{background:#f0f6ff;border:1px solid #93c5fd;border-radius:8px;padding:10px 14px;font-size:13px;color:#1e3a8a;margin-bottom:22px}
+
+/* ── QUESTION SCREEN ── */
+.screen{display:flex;flex-direction:column}
+.full-h{height:calc(100vh - 52px)}
+#q-nav-bar{background:#dce6f5;border-bottom:1px solid #b8c8e0;padding:7px 16px;display:flex;align-items:center;gap:7px;flex-shrink:0;flex-wrap:wrap}
+.q-dot{width:28px;height:28px;border-radius:50%;border:2px solid #9aaecc;background:#fff;color:#444;font-weight:700;font-size:11px;cursor:pointer;position:relative;flex-shrink:0;transition:all .15s}
+.q-dot.cur{background:#00529b;border-color:#00529b;color:#fff}
+.q-dot.ok{background:#dcfce7;border-color:#16a34a;color:#14532d}
+.q-dot.partial{background:#fef9c3;border-color:#ca8a04;color:#78350f}
+.q-dot.flag::after{content:'';position:absolute;top:-3px;right:-3px;width:9px;height:9px;background:#dc2626;border-radius:50%}
+.q-tools{margin-left:auto;display:flex;gap:6px;align-items:center}
+.q-tool-btn{background:#fff;border:1px solid #9aaecc;border-radius:5px;padding:3px 9px;font-size:11px;cursor:pointer;color:#444;font-weight:600}
+.q-tool-btn.active{background:#fef9c3;border-color:#ca8a04;color:#78350f}
+
+/* ── MAIN Q AREA ── */
+#q-main{flex:1;overflow-y:auto;background:#f7faff;display:flex;flex-direction:column}
+.q-content{max-width:900px;width:100%;margin:0 auto;padding:24px 28px;flex:1}
+.section-banner{background:#00529b;color:#fff;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;margin-bottom:20px;display:inline-block;letter-spacing:.5px}
+.q-number{font-size:11px;color:#64748b;font-weight:700;margin-bottom:8px;letter-spacing:.5px;text-transform:uppercase}
+.q-directions{font-size:13px;color:#64748b;font-style:italic;margin-bottom:10px}
+.q-stem{font-size:15px;font-weight:600;color:#1e293b;line-height:1.6;margin-bottom:6px}
+.q-stem-sub{font-size:14px;color:#1e293b;line-height:1.65;margin-bottom:18px}
+.q-image-box{background:#fff;border:2px solid #b8c8e0;border-radius:10px;padding:18px;margin-bottom:18px;display:flex;justify-content:center}
+.choices-col{display:flex;flex-direction:column;gap:9px}
+.choice-btn{display:flex;align-items:flex-start;gap:11px;padding:12px 14px;border-radius:9px;border:2px solid #dde8f5;background:#fff;cursor:pointer;text-align:left;width:100%;transition:all .15s}
+.choice-btn:hover:not(.sel){border-color:#93c5fd;background:#f0f7ff}
+.choice-btn.sel{border-color:#00529b;background:#e8f0fe}
+.choice-letter{width:26px;height:26px;border-radius:50%;border:2px solid #9aaecc;background:#fff;color:#444;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0}
+.choice-btn.sel .choice-letter{background:#00529b;border-color:#00529b;color:#fff}
+.choice-text{font-size:14px;color:#1e293b;line-height:1.5;padding-top:2px}
+
+/* MULTI-SELECT */
+.ms-choice{display:flex;align-items:flex-start;gap:11px;padding:12px 14px;border-radius:9px;border:2px solid #dde8f5;background:#fff;cursor:pointer;text-align:left;width:100%;transition:all .15s}
+.ms-choice:hover:not(.sel-ms){border-color:#93c5fd;background:#f0f7ff}
+.ms-choice.sel-ms{border-color:#7c3aed;background:#f5f3ff}
+.ms-box{width:22px;height:22px;border-radius:4px;border:2px solid #9aaecc;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:700;font-size:12px}
+.ms-choice.sel-ms .ms-box{background:#7c3aed;border-color:#7c3aed;color:#fff}
+
+/* OPEN RESPONSE */
+.or-textarea{width:100%;min-height:120px;border:2px solid #b8c8e0;border-radius:8px;padding:12px 14px;font-size:14px;line-height:1.7;resize:vertical;outline:none;background:#fff;font-family:inherit}
+.or-textarea:focus{border-color:#00529b}
+.or-hint{font-size:12px;color:#64748b;margin-top:6px;font-style:italic}
+
+/* NUMBER INPUT */
+.num-input-wrap{display:flex;align-items:center;gap:10px;margin-top:8px}
+.num-input{width:120px;height:44px;border:2px solid #b8c8e0;border-radius:8px;font-size:18px;font-weight:700;text-align:center;outline:none;color:#1e293b}
+.num-input:focus{border-color:#00529b}
+
+/* MATCHING / DRAG */
+.match-grid{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:start;margin-top:8px}
+.match-col{display:flex;flex-direction:column;gap:8px}
+.match-item{background:#fff;border:2px solid #b8c8e0;border-radius:8px;padding:10px 14px;font-size:14px;font-weight:600;color:#1e293b;text-align:center}
+.match-item.drop-zone{min-height:42px;background:#f7faff;border-style:dashed;cursor:default}
+.match-item.drop-zone.filled{background:#e8f0fe;border-color:#00529b;border-style:solid}
+.drag-item{cursor:grab;user-select:none;background:#e8f0fe;border-color:#00529b}
+.drag-item:active{cursor:grabbing;opacity:.7}
+.match-arrows{display:flex;flex-direction:column;gap:8px;justify-content:center;align-items:center;padding-top:0}
+.match-arrow{font-size:18px;color:#9aaecc;height:42px;display:flex;align-items:center}
+
+/* NUMBER LINE */
+.nline-wrap{background:#fff;border:2px solid #b8c8e0;border-radius:10px;padding:20px 28px;margin:8px 0}
+.nline-svg{width:100%;height:60px}
+
+/* TABLE */
+.q-table{border-collapse:collapse;margin:10px 0;font-size:14px}
+.q-table th{background:#00529b;color:#fff;padding:8px 14px;text-align:center;font-weight:700}
+.q-table td{border:1px solid #b8c8e0;padding:8px 14px;text-align:center;background:#fff}
+.q-table tr:nth-child(even) td{background:#f0f6ff}
+
+/* GRID VISUAL */
+.grid-vis{display:inline-grid;gap:2px;margin:6px}
+.grid-cell{width:20px;height:20px;border:1px solid #9aaecc;background:#e8f0fe;border-radius:2px}
+.grid-cell.filled{background:#00529b}
+
+/* FRACTION */
+.frac{display:inline-flex;flex-direction:column;align-items:center;font-size:16px;font-weight:700;line-height:1.1;vertical-align:middle;margin:0 3px}
+.frac .num{border-bottom:2px solid #1e293b;padding:0 4px}
+.frac .den{padding:0 4px}
+
+/* BOTTOM BAR */
+.btm-bar{background:#e8eef8;border-top:2px solid #b8c8e0;padding:9px 20px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.btm-ctr{font-size:12px;color:#555;text-align:center}
+
+/* BUTTONS */
+.btn{border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;transition:all .15s}
+.b-blue{background:#00529b;color:#fff}.b-blue:hover{background:#1a6db5}
+.b-green{background:#14532d;color:#fff}.b-green:hover{background:#166534}
+.b-ghost{background:#fff;color:#00529b;border:2px solid #b8c8e0}.b-ghost:hover{background:#f0f6ff}
+.b-big{width:100%;padding:15px;font-size:16px;border-radius:10px}
+
+/* REVIEW */
+#s-review{min-height:calc(100vh - 52px);background:#f5f8ff;padding:24px 20px;overflow-y:auto}
+.review-wrap{max-width:720px;margin:0 auto}
+.rev-item{display:flex;align-items:flex-start;gap:10px;background:#fff;border:1px solid #dde8f5;border-radius:10px;padding:12px 14px;margin-bottom:8px;cursor:pointer}
+.rev-item:hover{border-color:#00529b}
+.rev-num{width:30px;height:30px;border-radius:50%;background:#00529b;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0}
+.rev-item.answered .rev-num{background:#14532d}
+.rev-item.flagged-q .rev-num{background:#dc2626}
+
+/* CONFIRM */
+#s-confirm{min-height:calc(100vh - 52px);display:flex;align-items:center;justify-content:center;background:rgba(0,24,64,.6)}
+.confirm-card{background:#fff;border-radius:14px;padding:36px;max-width:460px;width:90%;text-align:center}
+
+/* REPORT */
+#s-report{background:#eef2fb;min-height:calc(100vh - 52px);padding:20px;overflow-y:auto}
+.rpt-wrap{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+.rpt-banner{background:#00529b;color:#fff;border-radius:14px;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.stat-card{background:#fff;border:1px solid #c8d8ea;border-radius:12px;padding:16px;text-align:center}
+.stat-lbl{font-size:10px;color:#888;font-weight:700;letter-spacing:.8px;text-transform:uppercase;margin-bottom:5px}
+.stat-val{font-size:26px;font-weight:900;line-height:1}
+.stat-sub{font-size:11px;color:#666;margin-top:5px}
+.rpt-card{background:#fff;border:1px solid #c8d8ea;border-radius:12px;padding:20px 24px}
+.rpt-title{font-weight:700;color:#00529b;font-size:14px;padding-bottom:10px;margin-bottom:14px;border-bottom:2px solid #e5edfa}
+.ans-item{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:8px;margin-bottom:8px;border:1px solid}
+.ai-cr{background:#f0fdf4;border-color:#86efac}
+.ai-wr{background:#fff1f2;border-color:#fca5a5}
+.ai-sk{background:#f8fafc;border-color:#e2e8f0}
+.ai-or{background:#fefce8;border-color:#fde68a}
+.ans-num{width:24px;height:24px;border-radius:50%;background:#00529b;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px}
+.lvl-badge{border-radius:10px;padding:12px 18px;display:flex;align-items:center;justify-content:space-between;border-width:2px;border-style:solid;margin-bottom:16px}
+.sbar-bg{flex:1;height:10px;background:#e2e8f0;border-radius:99px;overflow:hidden}
+.sbar-fill{height:100%;border-radius:99px;transition:width .9s}
+.or-ai-block{background:#fefce8;border:1px solid #fde68a;border-radius:10px;padding:14px;margin-bottom:10px}
+.or-ai-block .oab-title{font-weight:700;color:#92400e;font-size:12px;margin-bottom:6px}
+.or-ai-block p{font-size:13px;color:#78350f;line-height:1.6}
+.ld-dots{display:flex;justify-content:center;gap:6px;margin-top:14px}
+.ld-dot{width:8px;height:8px;border-radius:50%;background:#00529b;animation:blink 1.2s infinite}
+.ld-dot:nth-child(2){animation-delay:.4s}
+.ld-dot:nth-child(3){animation-delay:.8s}
+@keyframes blink{0%,100%{opacity:.25}40%{opacity:1}}
+.err-strip{background:#fff1f2;border:1px solid #fca5a5;border-radius:8px;padding:10px;color:#dc2626;font-size:12px}
+.score-dim{background:#f7faff;border:1px solid #dde8f5;border-radius:10px;padding:13px 16px;margin-bottom:10px}
+.dim-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.dim-lbl{font-weight:700;color:#1e293b;font-size:13px}
+.dim-badge{color:#fff;font-weight:800;font-size:12px;padding:3px 10px;border-radius:20px}
+.domain-section{margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;font-size:13px}
+.domain-bar{flex:1;height:8px;background:#e2e8f0;border-radius:99px;overflow:hidden;margin:0 10px}
+.domain-fill{height:100%;border-radius:99px;background:#00529b}
+
+@media(max-width:650px){.stat-row{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+
+<!-- ══ HEADER ══ -->
+<div id="hdr" class="hidden">
+  <div class="hdr-left">
+    <div class="nj-badge">NJ</div>
+    <div class="hdr-titles">
+      <div class="ht1">New Jersey Student Learning Assessment</div>
+      <div class="ht2" id="hdr-sub">Grade 3 Mathematics</div>
+    </div>
+  </div>
+  <div class="hdr-right">
+    <button class="hdr-tool" id="btn-scratch" onclick="toggleScratch()">🔢 Scratch Work</button>
+    <button class="hdr-tool" id="btn-note" onclick="toggleNotepad()">📝 Notes</button>
+    <button class="hdr-tool" id="btn-calc" onclick="toggleCalc()">🚫 Calculator</button>
+    <div id="timer-box">90:00</div>
+  </div>
+</div>
+
+<!-- ══ NOTEPAD ══ -->
+<div id="notepad-float" class="hidden">
+  <div class="np-hdr">Notes — not scored<button onclick="toggleNotepad()">×</button></div>
+  <textarea id="notepad-text" placeholder="Write notes here."></textarea>
+</div>
+
+<!-- ══ SCRATCH WORK ══ -->
+<div id="scratch-float" class="hidden" style="display:none">
+  <div class="sc-hdr">Scratch Work — not scored<button onclick="toggleScratch()">×</button></div>
+  <textarea id="scratch-text" placeholder="Show your work here. Not scored."></textarea>
+</div>
+
+<!-- ══ CALCULATOR NOTICE ══ -->
+<div id="calc-notice" class="hidden" style="position:fixed;bottom:20px;right:20px;background:#fff1f2;border:2px solid #fca5a5;border-radius:10px;padding:14px 18px;font-size:13px;color:#7f1d1d;z-index:300;max-width:240px;box-shadow:0 4px 16px rgba(0,0,0,.15)">
+  <strong>No Calculator</strong><br>Calculators are not permitted on this section of the NJSLA Grade 3 Math test.
+  <button onclick="document.getElementById('calc-notice').classList.add('hidden')" style="display:block;margin-top:8px;background:#dc2626;color:#fff;border:none;border-radius:5px;padding:4px 10px;font-size:11px;cursor:pointer">OK</button>
+</div>
+
+<!-- ════════════ SELECTOR ════════════ -->
+<div id="s-selector">
+  <div class="sel-hdr">
+    <h1>NJSLA Grade 3 Math — Practice Exam Generator</h1>
+    <p>Choose an exam. Each has multiple question types across all Grade 3 Math domains.</p>
+  </div>
+  <div class="exam-grid" id="exam-grid"></div>
+</div>
+
+<!-- ════════════ WELCOME ════════════ -->
+<div id="s-welcome" class="screen hidden" style="background:linear-gradient(160deg,#001840 0%,#00529b 60%,#0072c6 100%);min-height:100vh;align-items:center;justify-content:center;padding:20px">
+  <div class="welcome-box">
+    <div class="wlc-hero">
+      <div class="wlc-logo">NJ</div>
+      <div>
+        <div style="font-size:10px;color:#777;letter-spacing:2px;text-transform:uppercase;font-weight:600;margin-bottom:2px">New Jersey Student Learning Assessment</div>
+        <div style="font-size:20px;font-weight:800;color:#00529b" id="wlc-title">Grade 3 Mathematics</div>
+      </div>
+    </div>
+    <div class="info-2col">
+      <div><strong>Subject:</strong> Mathematics</div>
+      <div><strong>Total Time:</strong> 90 minutes</div>
+      <div><strong>Grade:</strong> 3</div>
+      <div><strong>Questions:</strong> <span id="wlc-qcount">—</span></div>
+    </div>
+    <div style="font-weight:700;color:#00529b;margin-bottom:8px;font-size:14px">Test Directions</div>
+    <ul class="dir-ul">
+      <li>Read each question carefully before answering.</li>
+      <li>For <strong>multiple-choice</strong> questions, select the best answer.</li>
+      <li>For <strong>select all that apply</strong> questions, choose every correct answer.</li>
+      <li>For <strong>open response</strong> questions, show your work and explain your thinking.</li>
+      <li>Use <strong>Scratch Work</strong> to draw pictures, work out problems, or take notes.</li>
+      <li>Use <strong>Flag for Review</strong> to mark questions to come back to.</li>
+    </ul>
+    <div class="ref-strip">📐 <strong>Reference Sheet:</strong> A ruler, number line, and multiplication table are available in the Scratch Work panel if needed.</div>
+    <div class="warn-strip">⚠ <strong>No Calculator.</strong> Calculators are NOT allowed on Grade 3 NJSLA Math.</div>
+    <div class="warn-strip" style="margin-bottom:0">⏱ The 90-minute timer starts when you click "Begin Test."</div>
+    <br>
+    <button class="btn b-blue b-big" onclick="beginTest()">Begin Test →</button>
+  </div>
+</div>
+
+<!-- ════════════ QUESTIONS ════════════ -->
+<div id="s-qs" class="screen full-h hidden">
+  <div id="q-nav-bar">
+    <span style="font-size:10px;font-weight:700;color:#334;margin-right:4px">QUESTIONS:</span>
+    <div id="q-dots" style="display:flex;gap:5px;flex-wrap:wrap"></div>
+    <div class="q-tools">
+      <span id="q-ans-count" style="font-size:10px;color:#555"></span>
+      <button class="q-tool-btn" id="flag-btn" onclick="toggleFlag()">🚩 Flag</button>
+    </div>
+  </div>
+  <div id="q-main">
+    <div class="q-content" id="q-content"></div>
+  </div>
+  <div class="btm-bar">
+    <button class="btn b-ghost" id="btn-bk" onclick="navQ(-1)">← Back</button>
+    <span class="btm-ctr" id="q-prog"></span>
+    <button class="btn b-blue" id="btn-fwd" onclick="navQ(1)">Next →</button>
+  </div>
+</div>
+
+<!-- ════════════ REVIEW ════════════ -->
+<div id="s-review" class="screen hidden">
+  <div class="review-wrap">
+    <h2 style="color:#00529b;font-size:19px;margin-bottom:6px">Review Your Answers</h2>
+    <p style="font-size:13px;color:#555;margin-bottom:18px">Click any question to return and change your answer before submitting.</p>
+    <div id="rev-list"></div>
+    <div style="display:flex;justify-content:space-between;margin-top:18px;padding-bottom:30px">
+      <button class="btn b-ghost" onclick="goToQ(currentQ)">← Back to Questions</button>
+      <button class="btn b-green" onclick="confirmSubmit()">Submit Test ✓</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ CONFIRM ════════════ -->
+<div id="s-confirm" class="screen hidden">
+  <div class="confirm-card">
+    <div style="font-size:46px;margin-bottom:10px">📊</div>
+    <h2 style="color:#00529b;font-size:19px;margin-bottom:10px">Submit Your Test?</h2>
+    <p style="color:#555;font-size:13px;line-height:1.7;margin-bottom:8px">Once submitted, you cannot go back and change your answers.</p>
+    <div id="confirm-stats" style="background:#f0f6ff;border:1px solid #c8d8ea;border-radius:8px;padding:12px;margin:14px 0;font-size:13px;text-align:left"></div>
+    <div style="display:flex;gap:12px;justify-content:center">
+      <button class="btn b-ghost" onclick="showScreen('s-review')">← Go Back</button>
+      <button class="btn b-green" onclick="finalSubmit()">Yes, Submit →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ REPORT ════════════ -->
+<div id="s-report" class="screen hidden">
+  <div class="rpt-wrap">
+    <div class="rpt-banner">
+      <div>
+        <div style="font-size:10px;opacity:.7;letter-spacing:1.5px;text-transform:uppercase">New Jersey Student Learning Assessment — Grade 3 Math</div>
+        <div style="font-size:18px;font-weight:800" id="rpt-title"></div>
+      </div>
+      <div style="text-align:right;font-size:12px;opacity:.85" id="rpt-meta"></div>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat-card"><div class="stat-lbl">Auto-Scored</div><div class="stat-val" id="rs-auto" style="color:#00529b">—</div><div class="stat-sub">MC + Numeric</div></div>
+      <div class="stat-card"><div class="stat-lbl">Open Response</div><div class="stat-val" id="rs-or" style="color:#888">—</div><div class="stat-sub" id="rs-or-sub">Pending AI scoring</div></div>
+      <div class="stat-card"><div class="stat-lbl">Performance Level</div><div class="stat-val" id="rs-lvl" style="color:#334;font-size:16px">—</div><div class="stat-sub">NJSLA Scale</div></div>
+    </div>
+
+    <!-- Domain breakdown -->
+    <div class="rpt-card">
+      <div class="rpt-title">Score by Math Domain</div>
+      <div id="domain-breakdown"></div>
+    </div>
+
+    <!-- Item review -->
+    <div class="rpt-card">
+      <div class="rpt-title">Question-by-Question Review</div>
+      <div id="rpt-q-review"></div>
+    </div>
+
+    <!-- Open response AI scoring -->
+    <div class="rpt-card" id="or-section">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:10px;margin-bottom:14px;border-bottom:2px solid #e5edfa">
+        <div style="font-weight:700;color:#00529b;font-size:14px">Open Response — AI Scoring &amp; Feedback</div>
+        <button class="btn b-green" id="score-or-btn" onclick="scoreOpenResponse()" style="font-size:12px;padding:8px 14px">Score Open Response</button>
+      </div>
+      <div id="or-score-area"><div style="background:#fefce8;border:1px dashed #fde68a;border-radius:8px;padding:16px;text-align:center;font-size:13px;color:#92400e">Click "Score Open Response" for AI-powered feedback on your written answers.</div></div>
+    </div>
+
+    <!-- Rubric -->
+    <div class="rpt-card">
+      <div class="rpt-title">Open Response Scoring Guide (NJSLA)</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+        <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:12px"><div style="font-weight:700;color:#14532d;font-size:12px;margin-bottom:6px">3 Points — Full Credit</div><div style="font-size:11px;color:#166534;line-height:1.5">Correct answer with complete work shown. Reasoning is clear and mathematically sound. No errors.</div></div>
+        <div style="background:#fefce8;border:1px solid #fde68a;border-radius:8px;padding:12px"><div style="font-weight:700;color:#92400e;font-size:12px;margin-bottom:6px">2 Points — Partial Credit</div><div style="font-size:11px;color:#78350f;line-height:1.5">Shows correct approach with minor errors, OR correct answer with incomplete explanation, OR one part of a two-part problem correct.</div></div>
+        <div style="background:#fff1f2;border:1px solid #fca5a5;border-radius:8px;padding:12px"><div style="font-weight:700;color:#7f1d1d;font-size:12px;margin-bottom:6px">1 Point — Minimal Credit</div><div style="font-size:11px;color:#991b1b;line-height:1.5">Shows some mathematical understanding. Partial work shown. Significant errors present but approach is not completely wrong.</div></div>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:center;gap:12px;padding-bottom:30px">
+      <button class="btn" onclick="window.print()" style="background:#00529b;color:#fff;padding:10px 20px">🖨 Print Report</button>
+      <button class="btn b-blue" onclick="backToSelector()">← Choose Another Exam</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+//  EXAM DATA  — 5 original Grade 3 Math exams
+//  Types: mc=multiple choice, ms=multi-select,
+//         or=open response, num=numeric entry
+// ══════════════════════════════════════════
+const EXAMS=[
+{
+  id:1, title:"Operations & Fractions", domain:"OA / NF / MD",
+  desc:"Multiplication, division, fraction concepts, and measurement problems.",
+  questions:[
+    {type:"mc",domain:"OA",points:1,
+     stem:"There are 4 boxes. Each box has 6 crayons. Which equation shows the total number of crayons?",
+     choices:["4 + 6 = 10","4 × 6 = 24","6 − 4 = 2","4 ÷ 6 = ?"],correct:1},
+    {type:"mc",domain:"OA",points:1,
+     stem:"A farmer plants 3 rows of corn. Each row has 8 plants. Which equation can be used to find the total number of plants?",
+     choices:["3 + 8 = 11","8 − 3 = 5","3 × 8 = 24","24 ÷ 3 = 8"],correct:2},
+    {type:"ms",domain:"OA",points:1,
+     stem:"Select ALL equations that are in the same fact family as 5 × 7 = 35.",
+     choices:["7 × 5 = 35","35 ÷ 5 = 7","35 ÷ 7 = 5","5 + 7 = 12","35 − 7 = 28"],correct:[0,1,2]},
+    {type:"mc",domain:"OA",points:1,
+     stem:"What is the unknown in this equation?\n\n□ ÷ 6 = 7",
+     choices:["1","13","42","48"],correct:2},
+    {type:"mc",domain:"NF",points:1,
+     stem:"Which fraction is represented by the point on the number line below?\n[Number line from 0 to 1, point marked at the 3rd tick out of 4 equal parts]",
+     choices:["1/4","2/4","3/4","4/4"],correct:2},
+    {type:"ms",domain:"NF",points:1,
+     stem:"Select ALL fractions that are equal to one whole (1).",
+     choices:["2/2","3/3","4/4","2/4","1/3"],correct:[0,1,2]},
+    {type:"mc",domain:"MD",points:1,
+     stem:"A piece of ribbon is 24 centimeters long. It is cut into 3 equal pieces. How long is each piece?",
+     choices:["6 cm","7 cm","8 cm","9 cm"],correct:2},
+    {type:"mc",domain:"MD",points:1,
+     stem:"The chart shows the number of books read by students:\nMia: 8  |  Leo: 12  |  Sam: 6  |  Ava: 10\n\nHow many MORE books did Leo read than Sam?",
+     choices:["4","6","8","18"],correct:1},
+    {type:"or",domain:"OA",points:3,
+     stem:"Part A: There are 6 tables in a classroom. Each table has 4 chairs. Write a multiplication equation to find the total number of chairs.\n\nPart B: If 8 more chairs are added to the classroom, how many chairs are there in all? Show your work and explain how you found your answer.",
+     rubric:"Part A: 6 × 4 = 24 (1 pt). Part B: 24 + 8 = 32, with work shown and clear explanation (2 pts)."},
+    {type:"or",domain:"NF",points:3,
+     stem:"Maya has a chocolate bar divided into 8 equal pieces. She eats 3 pieces.\n\nPart A: Write a fraction that shows how much of the chocolate bar Maya ate.\n\nPart B: Write a fraction that shows how much of the chocolate bar is left. Explain how you know.",
+     rubric:"Part A: 3/8 (1 pt). Part B: 5/8, with explanation that 8−3=5 pieces remain out of 8 equal parts (2 pts)."}
+  ]
+},
+{
+  id:2, title:"Place Value & Geometry", domain:"NBT / G / OA",
+  desc:"Three-digit numbers, rounding, shapes, area, and perimeter.",
+  questions:[
+    {type:"mc",domain:"NBT",points:1,
+     stem:"What is the value of the digit 7 in the number 374?",
+     choices:["7","70","700","7,000"],correct:1},
+    {type:"mc",domain:"NBT",points:1,
+     stem:"Which shows 500 + 60 + 3 written as a standard number?",
+     choices:["5,063","563","5,630","560"],correct:1},
+    {type:"ms",domain:"NBT",points:1,
+     stem:"Select ALL numbers that round to 400 when rounded to the nearest hundred.",
+     choices:["349","362","411","450","487"],correct:[1,2]},
+    {type:"mc",domain:"G",points:1,
+     stem:"A shape has 4 equal sides and 4 right angles. What shape is it?",
+     choices:["Rectangle","Rhombus","Square","Trapezoid"],correct:2},
+    {type:"ms",domain:"G",points:1,
+     stem:"Select ALL shapes that are quadrilaterals.",
+     choices:["Square","Triangle","Rectangle","Rhombus","Pentagon"],correct:[0,2,3]},
+    {type:"mc",domain:"MD",points:1,
+     stem:"A garden is 5 meters long and 3 meters wide. What is the area of the garden?",
+     choices:["8 square meters","15 square meters","16 square meters","30 square meters"],correct:1},
+    {type:"mc",domain:"MD",points:1,
+     stem:"A rectangle has a length of 9 cm and a width of 4 cm. What is the perimeter?",
+     choices:["13 cm","26 cm","36 cm","72 cm"],correct:1},
+    {type:"mc",domain:"NBT",points:1,
+     stem:"Marcus has 248 stamps. He gets 135 more stamps. How many stamps does he have now?",
+     choices:["373","383","473","113"],correct:1},
+    {type:"or",domain:"MD",points:3,
+     stem:"A farmer wants to build a fence around a rectangular field that is 8 meters long and 5 meters wide.\n\nPart A: Find the perimeter of the field. Show your work.\n\nPart B: The farmer says he needs 30 meters of fencing. Is he correct? Explain why or why not.",
+     rubric:"Part A: P = 8+8+5+5 = 26 m (1 pt). Part B: No, he is wrong, he needs 26 m not 30 m, with explanation (2 pts)."},
+    {type:"or",domain:"G",points:3,
+     stem:"Look at the two shapes below:\nShape A: a square with side length 4 cm\nShape B: a rectangle with length 6 cm and width 2 cm\n\nPart A: Find the area of both shapes. Show your work for each.\n\nPart B: Which shape has the greater area? How do you know?",
+     rubric:"Part A: Square = 4×4=16 sq cm; Rectangle = 6×2=12 sq cm (1 pt each). Part B: Shape A is greater, 16>12 (1 pt)."}
+  ]
+},
+{
+  id:3, title:"Multiplication Mastery", domain:"OA / NBT",
+  desc:"Multiplication strategies, patterns, properties, and multi-step word problems.",
+  questions:[
+    {type:"mc",domain:"OA",points:1,
+     stem:"Which expression has the same value as 6 × 8?",
+     choices:["(6 × 4) + (6 × 4)","(6 × 4) × (6 × 4)","6 + 8 + 6 + 8","6 × (8 + 1)"],correct:0},
+    {type:"mc",domain:"OA",points:1,
+     stem:"What property is shown by this equation?\n\n7 × 4 = 4 × 7",
+     choices:["Associative Property","Distributive Property","Commutative Property","Identity Property"],correct:2},
+    {type:"ms",domain:"OA",points:1,
+     stem:"Select ALL equations where the unknown (□) equals 6.",
+     choices:["□ × 7 = 42","54 ÷ □ = 9","□ × □ = 36","4 × □ = 28","30 ÷ □ = 5"],correct:[0,1,2,4]},
+    {type:"mc",domain:"OA",points:1,
+     stem:"A store has 9 shelves. Each shelf holds 7 jars. Two jars are broken and removed. How many jars are in the store now?",
+     choices:["61","63","65","16"],correct:0},
+    {type:"mc",domain:"OA",points:1,
+     stem:"Which multiplication fact BEST helps you find 8 × 6?",
+     choices:["8 × 5 = 40, then add 8","8 × 7 = 56, then subtract 6","6 × 6 = 36, then add 6","8 × 2 = 16, then double"],correct:0},
+    {type:"mc",domain:"NBT",points:1,
+     stem:"A school buys 4 packs of pencils. Each pack has 25 pencils. How many pencils does the school have in all?",
+     choices:["29","80","100","125"],correct:2},
+    {type:"ms",domain:"OA",points:1,
+     stem:"Select ALL that equal 36.",
+     choices:["4 × 9","6 × 6","3 × 12","5 × 7","9 × 4"],correct:[0,1,2,4]},
+    {type:"mc",domain:"OA",points:1,
+     stem:"Which equation could help you find the answer to 63 ÷ 9?",
+     choices:["9 × □ = 63","9 + □ = 63","63 − 9 = □","63 × 9 = □"],correct:0},
+    {type:"or",domain:"OA",points:3,
+     stem:"A baker makes 7 trays of muffins. Each tray holds 8 muffins.\n\nPart A: How many muffins does the baker make in all? Write a multiplication equation and solve.\n\nPart B: The baker puts the muffins equally into 4 boxes. How many muffins are in each box? Show your work and explain your thinking.",
+     rubric:"Part A: 7 × 8 = 56 muffins (1 pt). Part B: 56 ÷ 4 = 14 muffins per box, with work and explanation (2 pts)."},
+    {type:"or",domain:"OA",points:3,
+     stem:"The third-grade class is planning a party. There will be 5 tables. The teacher wants to put the same number of students at each table. There are 30 students in the class.\n\nPart A: Write a division equation to find how many students go at each table.\n\nPart B: The teacher gets 10 more chairs. Now she wants to add 2 more students to each table. Is that possible? Explain using math.",
+     rubric:"Part A: 30 ÷ 5 = 6 (1 pt). Part B: 6+2=8 students per table × 5 tables = 40 students; 30+10=40 chairs total; yes it is possible, with reasoning (2 pts)."}
+  ]
+},
+{
+  id:4, title:"Fractions & Measurement", domain:"NF / MD / G",
+  desc:"Fractions on number lines, comparing fractions, liquid volume, and mass.",
+  questions:[
+    {type:"mc",domain:"NF",points:1,
+     stem:"Which fraction is GREATER than 1/2?",
+     choices:["1/3","2/6","3/4","1/4"],correct:2},
+    {type:"ms",domain:"NF",points:1,
+     stem:"Select ALL fractions that are equivalent to 2/4.",
+     choices:["1/2","4/8","3/6","2/3","6/12"],correct:[0,1,2,4]},
+    {type:"mc",domain:"NF",points:1,
+     stem:"On a number line from 0 to 1 divided into 6 equal parts, which fraction is at the 4th mark?",
+     choices:["3/6","4/5","4/6","5/6"],correct:2},
+    {type:"mc",domain:"MD",points:1,
+     stem:"A pitcher holds 2 liters of juice. Emma pours 750 milliliters into a glass. How many milliliters of juice are left in the pitcher?\n\n(1 liter = 1,000 milliliters)",
+     choices:["750 mL","1,250 mL","1,750 mL","2,750 mL"],correct:1},
+    {type:"mc",domain:"MD",points:1,
+     stem:"Which unit would be BEST to measure the mass of an apple?",
+     choices:["Kilometer","Liter","Gram","Meter"],correct:2},
+    {type:"ms",domain:"NF",points:1,
+     stem:"Select ALL fractions that are LESS than 1/2.",
+     choices:["1/3","2/6","1/4","3/4","2/8"],correct:[0,2,4]},
+    {type:"mc",domain:"MD",points:1,
+     stem:"A bag of flour has a mass of 2 kilograms. A bag of sugar has a mass of 800 grams. What is the TOTAL mass of both bags?\n\n(1 kilogram = 1,000 grams)",
+     choices:["802 grams","2,800 grams","2,008 grams","1,800 grams"],correct:1},
+    {type:"mc",domain:"NF",points:1,
+     stem:"Jake ate 2/6 of a pizza. His sister ate 3/6 of the same pizza. What fraction of the pizza did they eat together?",
+     choices:["5/12","5/6","6/6","1/6"],correct:1},
+    {type:"or",domain:"NF",points:3,
+     stem:"Three friends each have a granola bar the same size. Lily eats 3/8 of her bar. Marco eats 5/8 of his bar. Destiny eats 2/8 of her bar.\n\nPart A: Who ate the most? Who ate the least? Use the fractions to explain your answer.\n\nPart B: Order the three amounts from least to greatest. Show the fractions on a number line.",
+     rubric:"Part A: Marco ate most (5/8), Destiny ate least (2/8), with fraction comparison reasoning (1 pt). Part B: 2/8 < 3/8 < 5/8, number line drawn correctly (2 pts)."},
+    {type:"or",domain:"MD",points:3,
+     stem:"A fish tank holds 15 liters of water when full. Right now it has 9 liters in it.\n\nPart A: How many more liters are needed to fill the tank? Write an equation and solve.\n\nPart B: If you pour in 500 milliliters at a time, how many times will you need to pour to add the water from Part A? Show your work. (1 liter = 1,000 milliliters)",
+     rubric:"Part A: 15 − 9 = 6 liters needed (1 pt). Part B: 6 liters = 6,000 mL; 6,000 ÷ 500 = 12 times, with work (2 pts)."}
+  ]
+},
+{
+  id:5, title:"Data, Patterns & Word Problems", domain:"MD / OA / NBT",
+  desc:"Bar graphs, picture graphs, arithmetic patterns, and multi-step word problems.",
+  questions:[
+    {type:"mc",domain:"MD",points:1,
+     stem:"The bar graph shows how many students chose each favorite sport:\nSoccer: 12  |  Basketball: 9  |  Baseball: 6  |  Swimming: 15\n\nHow many students chose Soccer or Baseball combined?",
+     choices:["15","18","21","27"],correct:1},
+    {type:"mc",domain:"MD",points:1,
+     stem:"Using the data from Question 1, how many MORE students chose Swimming than Basketball?",
+     choices:["3","5","6","24"],correct:2},
+    {type:"mc",domain:"OA",points:1,
+     stem:"Look at this pattern:\n4, 8, 12, 16, ___\n\nWhat is the rule for this pattern?",
+     choices:["Add 3","Add 4","Multiply by 2","Add 5"],correct:1},
+    {type:"ms",domain:"OA",points:1,
+     stem:"Select ALL numbers that are multiples of 6.",
+     choices:["12","18","22","30","36"],correct:[0,1,3,4]},
+    {type:"mc",domain:"OA",points:1,
+     stem:"Which rule describes this pattern?\n1, 3, 9, 27, ___",
+     choices:["Add 2","Add 8","Multiply by 3","Multiply by 9"],correct:2},
+    {type:"mc",domain:"NBT",points:1,
+     stem:"The school store sold 136 pencils on Monday and 248 pencils on Tuesday. How many pencils were sold altogether?",
+     choices:["374","384","484","474"],correct:1},
+    {type:"ms",domain:"OA",points:1,
+     stem:"Tyler has 48 marbles. He wants to sort them into equal groups. Select ALL the ways Tyler can make equal groups.",
+     choices:["6 groups of 8","8 groups of 6","7 groups of 7","4 groups of 12","3 groups of 15"],correct:[0,1,3]},
+    {type:"mc",domain:"NBT",points:1,
+     stem:"A library has 625 fiction books and 418 non-fiction books. How many more fiction books are there than non-fiction books?",
+     choices:["193","207","217","293"],correct:1},
+    {type:"or",domain:"MD",points:3,
+     stem:"The table shows how many cans of food students collected for a food drive:\nMonday: 24  |  Tuesday: 37  |  Wednesday: 18  |  Thursday: 41  |  Friday: 30\n\nPart A: What was the total number of cans collected during the week? Show your work.\n\nPart B: The class goal was 160 cans. Did the class meet their goal? By how many cans did they exceed or fall short of the goal? Show your work and explain.",
+     rubric:"Part A: 24+37+18+41+30 = 150 cans (1 pt). Part B: 150 < 160, fell short by 10 cans, with correct work and explanation (2 pts)."},
+    {type:"or",domain:"OA",points:3,
+     stem:"Zoe saves $5 every week. After 6 weeks, she uses $12 to buy a book.\n\nPart A: How much money did Zoe save in 6 weeks? Write a multiplication equation.\n\nPart B: How much money does she have left after buying the book? Show all your work.\n\nPart C: How many more weeks must she save to have $30? Explain your thinking.",
+     rubric:"Part A: 6 × 5 = $30 (1 pt). Part B: 30 − 12 = $18 (1 pt). Part C: She has $18; needs $30; needs $12 more; 12 ÷ 5 = 2.4 so 3 more weeks (1 pt)."}
+  ]
+}
+];
+
+// ══════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════
+let exam=null,currentQ=0,answers={},flagged={},timerID=null,timeLeft=90*60;
+const LETTERS=['A','B','C','D','E','F'];
+const allScores={};
+
+// ══════════════════════════════════════════
+//  SELECTOR
+// ══════════════════════════════════════════
+function buildSelector(){
+  const g=document.getElementById('exam-grid');
+  g.innerHTML=EXAMS.map(e=>{
+    const done=allScores[e.id];
+    return `<div class="exam-card${done?' ec-done':''}" onclick="selectExam(${e.id})">
+      <div class="ec-num">${e.id}</div>
+      <div class="ec-domain">${e.domain}</div>
+      <div class="ec-title">${e.title}</div>
+      <div class="ec-desc">${e.desc}</div>
+      <div class="ec-tags">
+        <span class="ec-tag">90 min</span>
+        <span class="ec-tag">${e.questions.length} questions</span>
+        <span class="ec-tag">Open Response</span>
+      </div>
+      ${done?`<div class="ec-score-prev">Last auto-score: ${done.auto}/${done.total} points</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+function selectExam(id){
+  exam=EXAMS.find(e=>e.id===id);
+  answers={}; flagged={}; currentQ=0; timeLeft=90*60;
+  clearInterval(timerID);
+  document.getElementById('wlc-title').textContent='Exam '+exam.id+': '+exam.title;
+  document.getElementById('hdr-sub').textContent='Grade 3 Math — Exam '+exam.id+': '+exam.title;
+  document.getElementById('wlc-qcount').textContent=exam.questions.length+' questions';
+  document.getElementById('hdr').classList.remove('hidden');
+  updateTimerDisplay();
+  document.getElementById('score-or-btn').style.display='';
+  document.getElementById('or-score-area').innerHTML='<div style="background:#fefce8;border:1px dashed #fde68a;border-radius:8px;padding:16px;text-align:center;font-size:13px;color:#92400e">Click "Score Open Response" for AI-powered feedback.</div>';
+  showScreen('s-welcome');
+}
+
+function backToSelector(){
+  clearInterval(timerID);
+  document.getElementById('hdr').classList.add('hidden');
+  showScreen('s-selector');
+}
+
+// ══════════════════════════════════════════
+//  SCREENS
+// ══════════════════════════════════════════
+const SCREENS=['s-selector','s-welcome','s-qs','s-review','s-confirm','s-report'];
+function showScreen(id){SCREENS.forEach(s=>document.getElementById(s).classList.toggle('hidden',s!==id));}
+
+function beginTest(){
+  showScreen('s-qs');
+  renderQ(0);
+  timerID=setInterval(()=>{if(--timeLeft<=0){clearInterval(timerID);finalSubmit();}else updateTimerDisplay();},1000);
+}
+
+function updateTimerDisplay(){
+  const m=String(Math.floor(timeLeft/60)).padStart(2,'0'),s=String(timeLeft%60).padStart(2,'0');
+  const t=document.getElementById('timer-box');
+  t.textContent=m+':'+s; t.className=timeLeft<=600?'warn':'';
+}
+
+// ══════════════════════════════════════════
+//  QUESTIONS
+// ══════════════════════════════════════════
+function renderQ(i){
+  currentQ=i;
+  const q=exam.questions[i];
+  document.getElementById('q-prog').textContent='Question '+(i+1)+' / '+exam.questions.length;
+  buildDots();
+  updateAnsCount();
+  // flag
+  const fb=document.getElementById('flag-btn');
+  fb.textContent=flagged[i]?'🚩 Flagged':'🚩 Flag';
+  fb.className='q-tool-btn'+(flagged[i]?' active':'');
+  // back
+  const bk=document.getElementById('btn-bk');
+  bk.style.opacity=i===0?'.4':'1'; bk.style.pointerEvents=i===0?'none':'';
+  // next
+  const fwd=document.getElementById('btn-fwd');
+  if(i===exam.questions.length-1){
+    fwd.textContent='Review & Submit →'; fwd.className='btn b-green'; fwd.onclick=buildReview;
+  } else {
+    fwd.textContent='Next →'; fwd.className='btn b-blue'; fwd.onclick=()=>navQ(1);
+  }
+  // render content
+  const c=document.getElementById('q-content');
+  const domainLabel={'OA':'Operations & Algebraic Thinking','NBT':'Number & Operations in Base Ten','NF':'Number & Operations — Fractions','MD':'Measurement & Data','G':'Geometry'};
+  let html=`<div class="section-banner">${domainLabel[q.domain]||q.domain}</div>`;
+  html+=`<div class="q-number">Question ${i+1} of ${exam.questions.length} &nbsp;•&nbsp; ${q.points} Point${q.points>1?'s':''}</div>`;
+
+  if(q.type==='mc'){
+    html+=renderStemLines(q.stem);
+    html+='<div class="choices-col">';
+    html+=q.choices.map((ch,ci)=>{
+      const sel=answers[i]===ci;
+      return `<button class="choice-btn${sel?' sel':''}" onclick="selectMC(${i},${ci})">
+        <div class="choice-letter">${LETTERS[ci]}</div>
+        <div class="choice-text">${ch}</div>
+      </button>`;
+    }).join('');
+    html+='</div>';
+  } else if(q.type==='ms'){
+    html+=`<div class="q-directions">Select ALL correct answers.</div>`;
+    html+=renderStemLines(q.stem);
+    html+='<div class="choices-col">';
+    const sel=answers[i]||[];
+    html+=q.choices.map((ch,ci)=>{
+      const checked=sel.includes(ci);
+      return `<button class="ms-choice${checked?' sel-ms':''}" onclick="selectMS(${i},${ci})">
+        <div class="ms-box">${checked?'✓':''}</div>
+        <div class="choice-text">${ch}</div>
+      </button>`;
+    }).join('');
+    html+='</div>';
+  } else if(q.type==='or'){
+    html+=`<div class="q-directions">Open Response — Show all your work. Write your answer in the box.</div>`;
+    html+=renderStemLines(q.stem);
+    const val=answers[i]||'';
+    html+=`<textarea class="or-textarea" id="or-${i}" onchange="saveOR(${i})" placeholder="Write your answer and show your work here…">${val}</textarea>`;
+    html+=`<div class="or-hint">📐 Use the Scratch Work panel for drawings or calculations.</div>`;
+  }
+
+  c.innerHTML=html;
+  // restore scroll
+  document.getElementById('q-main').scrollTop=0;
+  // attach OR listener after render
+  if(q.type==='or'){
+    const ta=document.getElementById('or-'+i);
+    if(ta){ ta.addEventListener('input',()=>saveOR(i)); }
+  }
+}
+
+function renderStemLines(stem){
+  return '<div class="q-stem-sub">'+stem.replace(/\n/g,'<br>').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')+'</div>';
+}
+
+function selectMC(qi,ci){ answers[qi]=ci; renderQ(qi); }
+function selectMS(qi,ci){
+  if(!answers[qi]) answers[qi]=[];
+  const idx=answers[qi].indexOf(ci);
+  if(idx>=0) answers[qi].splice(idx,1); else answers[qi].push(ci);
+  renderQ(qi);
+}
+function saveOR(qi){ answers[qi]=document.getElementById('or-'+qi).value; }
+function navQ(d){ const n=currentQ+d; if(n>=0&&n<exam.questions.length) renderQ(n); }
+function toggleFlag(){ flagged[currentQ]=!flagged[currentQ]; renderQ(currentQ); }
+function goToQ(i){ showScreen('s-qs'); renderQ(i); }
+
+function buildDots(){
+  const c=document.getElementById('q-dots');
+  c.innerHTML=exam.questions.map((_,i)=>{
+    let cls='q-dot';
+    const q=exam.questions[i];
+    if(i===currentQ) cls+=' cur';
+    else if(q.type==='ms'){ if((answers[i]||[]).length>0) cls+=' ok'; }
+    else if(q.type==='or'){ if(answers[i]&&answers[i].trim().length>0) cls+=' ok'; }
+    else { if(answers[i]!==undefined) cls+=' ok'; }
+    if(flagged[i]) cls+=' flag';
+    return `<button class="${cls}" onclick="goToQ(${i})">${i+1}</button>`;
+  }).join('');
+}
+
+function updateAnsCount(){
+  let n=0;
+  exam.questions.forEach((q,i)=>{
+    if(q.type==='ms') n+=(answers[i]||[]).length>0?1:0;
+    else if(q.type==='or') n+=answers[i]&&answers[i].trim().length>0?1:0;
+    else n+=answers[i]!==undefined?1:0;
+  });
+  document.getElementById('q-ans-count').textContent=n+'/'+exam.questions.length+' answered';
+}
+
+// ══════════════════════════════════════════
+//  REVIEW
+// ══════════════════════════════════════════
+function buildReview(){
+  showScreen('s-review');
+  const list=document.getElementById('rev-list');
+  list.innerHTML=exam.questions.map((q,i)=>{
+    let answered=false;
+    if(q.type==='ms') answered=(answers[i]||[]).length>0;
+    else if(q.type==='or') answered=!!(answers[i]&&answers[i].trim().length>5);
+    else answered=answers[i]!==undefined;
+    const fl=flagged[i];
+    const statusTxt=fl?'🚩 Flagged':answered?'Answered':'⚠ Not answered';
+    const statusColor=fl?'#dc2626':answered?'#14532d':'#dc2626';
+    const cls=(fl?'flagged-q':answered?'answered':'');
+    return `<div class="rev-item ${cls}" onclick="goToQ(${i})">
+      <div class="rev-num">${i+1}</div>
+      <div style="flex:1">
+        <div style="font-size:13px;color:#1e293b;line-height:1.35;margin-bottom:3px">${q.stem.slice(0,80)+'…'}</div>
+        <div style="font-size:12px;font-weight:700;color:${statusColor}">${statusTxt}</div>
+      </div>
+      <span style="font-size:18px">${answered?'✓':'○'}</span>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════
+//  SUBMIT
+// ══════════════════════════════════════════
+function confirmSubmit(){
+  showScreen('s-confirm');
+  let answered=0;
+  exam.questions.forEach((q,i)=>{
+    if(q.type==='ms'){ if((answers[i]||[]).length>0) answered++; }
+    else if(q.type==='or'){ if(answers[i]&&answers[i].trim().length>0) answered++; }
+    else { if(answers[i]!==undefined) answered++; }
+  });
+  const unanswered=exam.questions.length-answered;
+  document.getElementById('confirm-stats').innerHTML=
+    `<div style="margin-bottom:5px"><strong>Questions answered:</strong> ${answered} of ${exam.questions.length}</div>`+
+    `${unanswered>0?`<div style="color:#dc2626"><strong>⚠ Unanswered:</strong> ${unanswered} question${unanswered>1?'s':''}</div>`:'<div style="color:#14532d">✓ All questions attempted</div>'}`;
+}
+
+function finalSubmit(){
+  clearInterval(timerID);
+  showScreen('s-report');
+  buildReport();
+}
+
+// ══════════════════════════════════════════
+//  REPORT
+// ══════════════════════════════════════════
+function buildReport(){
+  const used=90*60-timeLeft, um=Math.floor(used/60), us=used%60;
+  document.getElementById('rpt-title').textContent='Exam '+exam.id+': '+exam.title+' — Score Report';
+  document.getElementById('rpt-meta').innerHTML=`<div>Time used: ${um}m ${us}s</div>`;
+
+  // auto-score MC/MS/num
+  let autoScore=0, autoMax=0;
+  const domainMap={};
+  exam.questions.forEach((q,i)=>{
+    if(q.type==='or') return;
+    autoMax+=q.points;
+    if(!domainMap[q.domain]) domainMap[q.domain]={got:0,max:0};
+    domainMap[q.domain].max+=q.points;
+    let correct=false;
+    if(q.type==='mc') correct=answers[i]===q.correct;
+    else if(q.type==='ms'){
+      const sel=answers[i]||[];
+      correct=sel.length===q.correct.length&&q.correct.every(c=>sel.includes(c));
+    }
+    if(correct){ autoScore+=q.points; domainMap[q.domain].got+=q.points; }
+  });
+
+  document.getElementById('rs-auto').textContent=autoScore+' / '+autoMax;
+  document.getElementById('rs-auto').style.color='#00529b';
+
+  // domain breakdown
+  const domNames={'OA':'Operations & Algebraic Thinking','NBT':'Number & Operations in Base Ten','NF':'Fractions','MD':'Measurement & Data','G':'Geometry'};
+  document.getElementById('domain-breakdown').innerHTML=Object.entries(domainMap).map(([d,v])=>{
+    const pct=Math.round(v.got/v.max*100)||0;
+    return `<div class="domain-section">
+      <span style="min-width:200px;font-size:13px;color:#334">${domNames[d]||d}</span>
+      <div class="domain-bar"><div class="domain-fill" style="width:${pct}%"></div></div>
+      <span style="font-size:13px;font-weight:700;color:#00529b;min-width:50px;text-align:right">${v.got}/${v.max}</span>
+    </div>`;
+  }).join('');
+
+  // item review
+  document.getElementById('rpt-q-review').innerHTML=exam.questions.map((q,i)=>{
+    let cls='ai-sk', icon='○', detail='';
+    if(q.type==='or'){
+      cls='ai-or'; icon='✍';
+      detail=`<span style="color:#92400e;font-size:12px">Open response — see AI scoring below</span>`;
+    } else {
+      let correct=false;
+      if(q.type==='mc') correct=answers[i]===q.correct;
+      else if(q.type==='ms'){
+        const sel=answers[i]||[];
+        correct=sel.length===q.correct.length&&q.correct.every(c=>sel.includes(c));
+      }
+      cls=answers[i]===undefined?'ai-sk':correct?'ai-cr':'ai-wr';
+      icon=answers[i]===undefined?'○':correct?'✓':'✗';
+      if(q.type==='mc'){
+        const chosen=answers[i];
+        detail=`<span style="font-size:12px">Your answer: <strong style="color:${correct?'#14532d':chosen===undefined?'#555':'#dc2626'}">${chosen!==undefined?LETTERS[chosen]:'Not answered'}</strong>`;
+        if(!correct&&chosen!==undefined) detail+=` &nbsp; Correct: <strong style="color:#14532d">${LETTERS[q.correct]} — ${q.choices[q.correct]}</strong>`;
+        detail+='</span>';
+      } else if(q.type==='ms'){
+        const sel=answers[i]||[];
+        detail=`<span style="font-size:12px">Your answer: ${sel.map(c=>LETTERS[c]).join(', ')||'Not answered'} &nbsp; Correct: ${q.correct.map(c=>LETTERS[c]).join(', ')}</span>`;
+      }
+    }
+    return `<div class="ans-item ${cls}">
+      <div class="ans-num">${i+1}</div>
+      <div style="flex:1">
+        <div style="font-size:13px;color:#1e293b;line-height:1.35;margin-bottom:4px">${q.stem.slice(0,100)+'…'}</div>
+        ${detail}
+      </div>
+      <span style="font-size:18px;flex-shrink:0;margin-left:6px">${icon}</span>
+    </div>`;
+  }).join('');
+
+  // save
+  allScores[exam.id]={auto:autoScore,total:autoMax};
+  buildSelector();
+  document.getElementById('rs-lvl').textContent='See AI Score';
+}
+
+// ══════════════════════════════════════════
+//  AI OPEN RESPONSE SCORING
+// ══════════════════════════════════════════
+async function scoreOpenResponse(){
+  const orQs=exam.questions.map((q,i)=>({q,i})).filter(({q})=>q.type==='or');
+  if(!orQs.length) return;
+  document.getElementById('score-or-btn').style.display='none';
+  document.getElementById('or-score-area').innerHTML=`
+    <div style="text-align:center;padding:28px 0">
+      <div style="font-size:13px;color:#00529b;font-weight:700;margin-bottom:6px">Scoring open response answers…</div>
+      <div style="font-size:12px;color:#64748b">Applying NJSLA Grade 3 Math rubric</div>
+      <div class="ld-dots"><div class="ld-dot"></div><div class="ld-dot"></div><div class="ld-dot"></div></div>
+    </div>`;
+
+  const items=orQs.map(({q,i})=>({
+    number:i+1, stem:q.stem, rubric:q.rubric,
+    student_answer:answers[i]||'(no answer provided)'
+  }));
+
+  const prompt=`You are an NJSLA Grade 3 Mathematics scorer. Score each open response item below using this rubric:
+3 pts = Correct answer, complete work shown, clear mathematical reasoning, no significant errors.
+2 pts = Correct approach with minor errors OR correct answer with incomplete explanation OR one part of a two-part problem correct.
+1 pt = Shows some mathematical understanding; partial work; significant errors but approach not entirely wrong.
+0 pts = No response, completely incorrect, or no mathematical understanding shown.
+
+Exam context: "${exam.title}" — Grade 3 Math
+
+ITEMS TO SCORE:
+${JSON.stringify(items,null,2)}
+
+Return ONLY valid JSON, no markdown:
+{
+  "items": [
+    {
+      "question_number": <number>,
+      "score": <0-3>,
+      "max_score": 3,
+      "feedback": "<2-3 specific sentences of mathematical feedback>",
+      "what_was_good": "<specific strength>",
+      "what_to_improve": "<specific area to improve>"
+    }
+  ],
+  "total_or_score": <sum>,
+  "total_or_max": <max>,
+  "overall_comment": "<1-2 sentence overall comment appropriate for Grade 3>"
+}`;
+
+  try{
+    const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1200,messages:[{role:"user",content:prompt}]})});
+    const data=await res.json();
+    const raw=(data.content?.find(b=>b.type==="text")?.text||"").replace(/```json|```/g,"").trim();
+    const scored=JSON.parse(raw);
+    renderORScores(scored);
+  } catch(e){
+    document.getElementById('or-score-area').innerHTML=`<div class="err-strip">Scoring failed. <button onclick="rescoreOR()" style="background:none;border:none;color:#dc2626;font-weight:700;cursor:pointer;text-decoration:underline">Try again</button></div>`;
+    document.getElementById('score-or-btn').style.display='';
+  }
+}
+
+function rescoreOR(){
+  document.getElementById('score-or-btn').style.display='';
+  document.getElementById('or-score-area').innerHTML='<div style="background:#fefce8;border:1px dashed #fde68a;border-radius:8px;padding:16px;text-align:center;font-size:13px;color:#92400e">Click "Score Open Response" above.</div>';
+}
+
+function renderORScores(scored){
+  // update stat cards
+  document.getElementById('rs-or').textContent=scored.total_or_score+' / '+scored.total_or_max;
+  document.getElementById('rs-or').style.color='#d97706';
+  document.getElementById('rs-or-sub').textContent='AI Scored';
+  // update level
+  const autoEl=document.getElementById('rs-auto').textContent;
+  const [ag,am]=autoEl.split(' / ').map(Number);
+  const grandTotal=ag+(scored.total_or_score||0);
+  const grandMax=am+(scored.total_or_max||0);
+  const pct=Math.round(grandTotal/grandMax*100);
+  let lvl='Below Proficient', lvlColor='#dc2626';
+  if(pct>=85){lvl='Advanced';lvlColor='#14532d';}
+  else if(pct>=70){lvl='Proficient';lvlColor='#1d4ed8';}
+  else if(pct>=55){lvl='Approaching Proficient';lvlColor='#d97706';}
+  const lvlEl=document.getElementById('rs-lvl');
+  lvlEl.textContent=lvl; lvlEl.style.color=lvlColor; lvlEl.style.fontSize='14px';
+  // render items
+  document.getElementById('or-score-area').innerHTML=
+    scored.items.map(item=>{
+      const pct2=Math.round(item.score/item.max_score*100);
+      const color=item.score>=3?'#14532d':item.score>=2?'#d97706':item.score>=1?'#b45309':'#dc2626';
+      return `<div class="score-dim">
+        <div class="dim-hdr">
+          <div class="dim-lbl">Question ${item.question_number}</div>
+          <span class="dim-badge" style="background:${color}">${item.score} / ${item.max_score} pts</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+          <div class="sbar-bg"><div class="sbar-fill" style="width:${pct2}%;background:${color}"></div></div>
+        </div>
+        <div style="font-size:13px;color:#334;line-height:1.6;border-top:1px solid #dde8f5;padding-top:8px;margin-top:4px">${item.feedback}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">
+          <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:9px 11px">
+            <div style="font-weight:700;color:#14532d;font-size:11px;margin-bottom:4px">✓ Strength</div>
+            <div style="font-size:12px;color:#166534;line-height:1.45">${item.what_was_good}</div>
+          </div>
+          <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:9px 11px">
+            <div style="font-weight:700;color:#92400e;font-size:11px;margin-bottom:4px">→ Improve</div>
+            <div style="font-size:12px;color:#78350f;line-height:1.45">${item.what_to_improve}</div>
+          </div>
+        </div>
+      </div>`;
+    }).join('')+
+    `<div class="overall-box" style="background:#eff6ff;border:1px solid #93c5fd;border-radius:10px;padding:13px 16px;margin-top:12px">
+      <div style="font-weight:700;color:#1d4ed8;font-size:12px;margin-bottom:5px">Overall Math Comments</div>
+      <p style="font-size:13px;color:#1e3a8a;line-height:1.65;margin:0">${scored.overall_comment}</p>
+    </div>`;
+  allScores[exam.id]={...allScores[exam.id], or:scored.total_or_score};
+  buildSelector();
+}
+
+// ══════════════════════════════════════════
+//  TOOLS
+// ══════════════════════════════════════════
+function toggleNotepad(){
+  const el=document.getElementById('notepad-float');
+  const btn=document.getElementById('btn-note');
+  el.classList.toggle('hidden');
+  btn.classList.toggle('on',!el.classList.contains('hidden'));
+}
+function toggleScratch(){
+  const el=document.getElementById('scratch-float');
+  const btn=document.getElementById('btn-scratch');
+  const isHidden=el.style.display==='none'||!el.style.display||el.style.display==='';
+  el.style.display=isHidden?'flex':'none';
+  btn.classList.toggle('on',isHidden);
+}
+function toggleCalc(){
+  document.getElementById('calc-notice').classList.toggle('hidden');
+}
+
+// ══════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════
+buildSelector();
+</script>
+</body>
+</html>

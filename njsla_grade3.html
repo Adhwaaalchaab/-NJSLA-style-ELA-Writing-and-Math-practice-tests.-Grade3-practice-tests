@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NJSLA Grade 3 ELA — Research Simulation Task</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4ff;min-height:100vh}
+  .hidden{display:none!important}
+
+  /* HEADER */
+  #header{background:#003087;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:10px 20px;border-bottom:3px solid #f0c040;position:sticky;top:0;z-index:50}
+  #header .logo{background:#fff;color:#003087;font-weight:900;font-size:14px;padding:4px 8px;border-radius:4px;letter-spacing:1px;margin-right:12px}
+  #header .title-block .t1{font-size:12px;font-weight:700;letter-spacing:.5px}
+  #header .title-block .t2{font-size:11px;opacity:.8}
+  #header .right{display:flex;align-items:center;gap:12px}
+  #notepad-btn{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.4);border-radius:6px;padding:5px 12px;font-size:12px;cursor:pointer;font-weight:600}
+  #notepad-btn.active{background:#f0c040;color:#003087}
+  #timer{background:rgba(255,255,255,.15);border:2px solid rgba(255,255,255,.4);border-radius:8px;padding:5px 14px;font-family:monospace;font-size:18px;font-weight:700;letter-spacing:2px;color:#fff}
+  #timer.warn{background:#991b1b;border-color:#fca5a5}
+
+  /* NOTEPAD */
+  #notepad{position:fixed;right:20px;top:70px;width:300px;background:#fff;border:2px solid #003087;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,48,.25);z-index:200;display:flex;flex-direction:column}
+  #notepad .np-hdr{background:#003087;color:#fff;padding:9px 14px;border-radius:8px 8px 0 0;display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:700}
+  #notepad textarea{width:100%;height:200px;padding:12px;border:none;border-radius:0 0 8px 8px;resize:none;font-family:Georgia,serif;font-size:13px;line-height:1.6;outline:none}
+
+  /* SCREENS */
+  .screen{min-height:calc(100vh - 55px);display:flex;flex-direction:column}
+
+  /* WELCOME */
+  #s-welcome{align-items:center;justify-content:center;padding:20px;background:linear-gradient(160deg,#001a4e 0%,#003087 60%,#004ab5 100%)}
+  .welcome-card{background:#fff;border-radius:16px;padding:44px;max-width:680px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+  .welcome-card .logo-row{display:flex;align-items:center;gap:16px;margin-bottom:28px}
+  .welcome-card .logo-box{width:56px;height:56px;background:#003087;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:22px;flex-shrink:0}
+  .info-grid{background:#f0f6ff;border:1px solid #c8d8ea;border-radius:10px;padding:16px 20px;margin-bottom:22px;display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px;color:#444}
+  .dir-list{color:#4a5568;font-size:14px;line-height:2;margin:0;padding-left:20px}
+  .warn-box{background:#fffbeb;border:1px solid #f0c040;border-radius:8px;padding:12px 16px;margin:16px 0 28px;font-size:13px;color:#78350f}
+
+  /* DIRECTION SCREENS */
+  .dir-screen{flex:1;display:flex;align-items:center;justify-content:center;background:#f5f8ff;padding:20px}
+  .dir-card{background:#fff;border:2px solid #c8d8ea;border-radius:14px;padding:44px;max-width:600px;width:100%}
+  .part-badge{display:inline-block;padding:5px 16px;border-radius:20px;font-size:12px;font-weight:700;margin-bottom:18px;color:#fff}
+  .part-badge.p1{background:#003087}
+  .part-badge.p2{background:#166534}
+  .tip-box{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:12px 16px;margin-bottom:28px;font-size:13px;color:#166534}
+  .prompt-box{background:#eff6ff;border:2px solid #003087;border-radius:10px;padding:18px 22px;margin-bottom:20px}
+  .remember-list{color:#4a5568;font-size:14px;line-height:2.2;margin:10px 0 28px;padding-left:20px}
+
+  /* QUESTION SCREEN */
+  #s-qs{height:calc(100vh - 55px);flex-direction:column}
+  #q-nav{background:#e8eef8;border-bottom:1px solid #c8d8ea;padding:8px 20px;display:flex;align-items:center;gap:8px;flex-shrink:0}
+  .q-dot{width:32px;height:32px;border-radius:50%;border:2px solid #aab;background:#fff;color:#555;font-weight:700;font-size:13px;cursor:pointer;position:relative}
+  .q-dot.active{background:#003087;border-color:#003087;color:#fff}
+  .q-dot.answered{background:#f0fdf4;border-color:#166534;color:#166534}
+  .q-dot.flagged::after{content:'!';position:absolute;top:-4px;right:-4px;font-size:9px;background:#dc2626;color:#fff;border-radius:50%;width:12px;height:12px;display:flex;align-items:center;justify-content:center;line-height:12px}
+  #split{flex:1;display:flex;overflow:hidden}
+  #passage-pane{width:48%;border-right:2px solid #c8d8ea;overflow:auto;background:#fff}
+  #passage-pane .p-hdr{background:#003087;color:#fff;padding:12px 20px;position:sticky;top:0;z-index:10}
+  #passage-pane .p-hdr .src{font-size:11px;opacity:.75;letter-spacing:1px;text-transform:uppercase}
+  #passage-pane .p-hdr .ttl{font-size:15px;font-weight:700}
+  #passage-pane .p-body{padding:20px 24px}
+  #passage-pane .p-body p{font-size:15px;line-height:1.85;color:#1a1a2e;margin-bottom:16px}
+  #q-pane{flex:1;overflow:auto;background:#fafcff;padding:28px}
+  .q-badge{background:#003087;color:#fff;display:inline-block;padding:4px 14px;border-radius:20px;font-size:12px;font-weight:700;margin-bottom:20px}
+  .q-prompt{font-size:13px;color:#666;margin-bottom:8px;font-style:italic}
+  .q-quote{background:#fffbeb;border:1px solid #f0c040;border-left:4px solid #f0c040;padding:10px 16px;border-radius:0 8px 8px 0;margin-bottom:16px;font-size:15px;font-style:italic;color:#4a3800}
+  .q-stem{font-size:16px;font-weight:600;color:#1a1a2e;line-height:1.5;margin-bottom:24px}
+  .choices{display:flex;flex-direction:column;gap:10px}
+  .choice{display:flex;align-items:flex-start;gap:12px;padding:13px 16px;border-radius:10px;border:2px solid #dde6f0;background:#fff;cursor:pointer;text-align:left;width:100%}
+  .choice:hover{border-color:#93c5fd;background:#f0f7ff}
+  .choice.selected{border-color:#003087;background:#e8f0fe}
+  .choice .letter{width:28px;height:28px;border-radius:50%;border:2px solid #aab;background:#fff;color:#555;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0}
+  .choice.selected .letter{background:#003087;border-color:#003087;color:#fff}
+  .choice .txt{font-size:14px;color:#333;line-height:1.55;padding-top:4px}
+  .choice.selected .txt{color:#003087;font-weight:600}
+
+  /* WRITING SCREEN */
+  #s-write{height:calc(100vh - 55px);flex-direction:column}
+  #src-tabs{background:#e8eef8;border-bottom:1px solid #c8d8ea;padding:0 20px;display:flex;align-items:flex-end;gap:4px;flex-shrink:0}
+  .src-tab{padding:9px 16px;border:1px solid #c8d8ea;border-bottom:1px solid #c8d8ea;border-radius:7px 7px 0 0;background:#dde6f5;color:#555;font-weight:500;font-size:12px;cursor:pointer}
+  .src-tab.active{background:#fff;border-color:#003087;border-bottom:2px solid #fff;color:#003087;font-weight:700;margin-bottom:-1px}
+  #write-split{flex:1;display:flex;overflow:hidden}
+  #ref-pane{width:40%;border-right:2px solid #c8d8ea;overflow:auto;background:#fff}
+  #ref-pane .r-hdr{background:#003087;color:#fff;padding:10px 18px;position:sticky;top:0;z-index:10}
+  #editor-pane{flex:1;display:flex;flex-direction:column;overflow:hidden}
+  #prompt-bar{background:#eff6ff;border-bottom:1px solid #c8d8ea;padding:10px 20px;font-size:13px;color:#003087;flex-shrink:0}
+  #toolbar{background:#f5f7fa;border-bottom:1px solid #e0e8f0;padding:6px 16px;display:flex;align-items:center;gap:6px;flex-shrink:0}
+  #toolbar button{background:#fff;border:1px solid #ccd6e0;border-radius:4px;padding:3px 9px;font-size:11px;cursor:pointer;color:#444}
+  #wc-badge{margin-left:auto;background:#fffbeb;border:1px solid #f0c040;border-radius:6px;padding:3px 10px;font-size:12px;font-weight:600;color:#92400e}
+  #wc-badge.good{background:#f0fdf4;border-color:#86efac;color:#166534}
+  #essay{flex:1;padding:22px 26px;border:none;outline:none;resize:none;font-family:Georgia,serif;font-size:16px;line-height:2.05;color:#1a1a2e;background:white;background-image:repeating-linear-gradient(transparent,transparent 31px,#dde6f0 31px,#dde6f0 32px);background-attachment:local}
+
+  /* BOTTOM BAR */
+  .btm{background:#f0f4f8;border-top:2px solid #c8d8ea;padding:10px 24px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+  .btm span{font-size:12px;color:#666}
+
+  /* BUTTONS */
+  .btn{border:none;border-radius:8px;padding:10px 20px;font-size:14px;font-weight:700;cursor:pointer}
+  .btn-blue{background:#003087;color:#fff}
+  .btn-green{background:#166534;color:#fff}
+  .btn-ghost{background:#fff;color:#003087;border:2px solid #c8d8ea}
+  .btn-gray{background:#9ca3af;color:#fff;cursor:default}
+  .btn-big{width:100%;padding:16px;font-size:17px;border-radius:10px}
+  .btn-blue:hover{background:#1a4db5}
+  .btn-green:hover{background:#14532d}
+
+  /* DONE / REPORT */
+  #s-done{padding:20px 16px;background:#f0f4ff}
+  .report-wrap{max-width:800px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+  .report-banner{background:#003087;color:#fff;border-radius:14px;padding:16px 28px;display:flex;align-items:center;justify-content:space-between}
+  .stat-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+  .stat-card{background:#fff;border:1px solid #c8d8ea;border-radius:12px;padding:18px 20px;text-align:center}
+  .stat-card .slabel{font-size:11px;color:#888;font-weight:600;letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px}
+  .stat-card .sval{font-weight:900;font-size:28px;line-height:1}
+  .stat-card .ssub{font-size:11px;color:#666;margin-top:6px}
+  .section-card{background:#fff;border:1px solid #c8d8ea;border-radius:12px;padding:20px 24px}
+  .section-title{font-weight:700;color:#003087;font-size:15px;margin-bottom:14px;border-bottom:2px solid #e5edfa;padding-bottom:10px}
+  .ans-row{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;padding:10px 12px;border-radius:8px}
+  .ans-row.correct{background:#f0fdf4;border:1px solid #86efac}
+  .ans-row.wrong{background:#fff1f2;border:1px solid #fca5a5}
+  .ans-row.blank{background:#f9fafb;border:1px solid #e5e7eb}
+  .ans-num{width:24px;height:24px;border-radius:50%;background:#003087;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px}
+  .score-section-hdr{display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #e5edfa;padding-bottom:10px;margin-bottom:16px}
+  .score-btn{background:#166534;color:#fff;border:none;border-radius:8px;padding:9px 18px;font-size:13px;font-weight:700;cursor:pointer}
+  .level-badge{border-radius:10px;padding:12px 18px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;border-width:2px;border-style:solid}
+  .score-bar-wrap{display:flex;align-items:center;gap:10px;margin:6px 0}
+  .score-bar-bg{flex:1;height:10px;background:#e5e7eb;border-radius:99px;overflow:hidden}
+  .score-bar-fill{height:100%;border-radius:99px;transition:width .8s}
+  .dim-card{margin-bottom:16px;background:#f8faff;border:1px solid #dde6f0;border-radius:10px;padding:14px 18px}
+  .dim-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+  .dim-score-badge{color:#fff;font-weight:800;font-size:13px;padding:3px 10px;border-radius:20px}
+  .dim-fb{font-size:13px;color:#374151;line-height:1.6;border-top:1px solid #dde6f0;padding-top:10px;margin-top:8px}
+  .sg-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+  .sg-card{border-radius:10px;padding:14px 16px;border:1px solid}
+  .sg-card .sg-title{font-weight:700;font-size:13px;margin-bottom:10px}
+  .sg-item{display:flex;gap:8px;margin-bottom:6px;font-size:13px;line-height:1.4}
+  .overall-card{background:#eff6ff;border:1px solid #93c5fd;border-radius:10px;padding:14px 18px}
+  .rubric-ref{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+  .rubric-dim{background:#f8faff;border:1px solid #dde6f0;border-radius:8px;padding:10px 12px}
+  .rubric-dim .rd-title{font-weight:700;font-size:12px;color:#003087;margin-bottom:6px}
+  .rubric-dim p{font-size:11px;color:#555;line-height:1.5;margin-bottom:3px}
+  .scoring-loading{text-align:center;padding:32px 0}
+  .loading-dots{display:flex;justify-content:center;gap:6px;margin-top:16px}
+  .dot{width:8px;height:8px;border-radius:50%;background:#003087;animation:bounce 1.2s infinite}
+  .dot:nth-child(2){animation-delay:.4s}
+  .dot:nth-child(3){animation-delay:.8s}
+  @keyframes bounce{0%,80%,100%{opacity:.3;transform:scale(.8)}40%{opacity:1;transform:scale(1)}}
+  .no-essay{color:#888;font-size:13px;text-align:center;padding:20px 0;font-style:italic}
+  .ready-box{background:#f8faff;border:1px dashed #c8d8ea;border-radius:10px;padding:20px;text-align:center;font-size:13px;color:#555}
+  .err-box{background:#fff1f2;border:1px solid #fca5a5;border-radius:8px;padding:12px 16px;color:#dc2626;font-size:13px;margin-bottom:12px}
+  .retake-wrap{text-align:center;padding-bottom:20px}
+</style>
+</head>
+<body>
+
+<!-- HEADER (hidden on welcome) -->
+<div id="header" class="hidden">
+  <div style="display:flex;align-items:center">
+    <div class="logo">NJ</div>
+    <div class="title-block">
+      <div class="t1">New Jersey Student Learning Assessment</div>
+      <div class="t2">Grade 3 ELA — Research Simulation Task</div>
+    </div>
+  </div>
+  <div class="right">
+    <button id="notepad-btn" onclick="toggleNotepad()">Notepad</button>
+    <div id="timer">90:00</div>
+  </div>
+</div>
+
+<!-- NOTEPAD -->
+<div id="notepad" class="hidden">
+  <div class="np-hdr">
+    Scratch Pad — not scored
+    <button onclick="toggleNotepad()" style="background:none;border:none;color:#fff;font-size:20px;cursor:pointer;line-height:1">×</button>
+  </div>
+  <textarea id="notepad-text" placeholder="Write notes here. These will NOT be scored."></textarea>
+</div>
+
+<!-- ===== WELCOME ===== -->
+<div id="s-welcome" class="screen">
+  <div class="welcome-card">
+    <div class="logo-row">
+      <div class="logo-box">NJ</div>
+      <div>
+        <div style="font-size:11px;color:#777;letter-spacing:2px;text-transform:uppercase;font-weight:600">New Jersey Student Learning Assessment</div>
+        <div style="font-size:22px;font-weight:800;color:#003087">Grade 3 ELA Performance Task</div>
+      </div>
+    </div>
+    <div class="info-grid">
+      <div><strong>Task Type:</strong> Research Simulation Task</div>
+      <div><strong>Total Time:</strong> 90 minutes</div>
+      <div><strong>Number of Parts:</strong> 2</div>
+      <div><strong>Grade Level:</strong> 3</div>
+    </div>
+    <div style="font-weight:700;color:#003087;margin-bottom:10px;font-size:14px">Directions</div>
+    <ul class="dir-list">
+      <li>You will read <strong>two sources</strong> about animals that help people.</li>
+      <li>In <strong>Part 1</strong>, answer questions about each source.</li>
+      <li>In <strong>Part 2</strong>, write an informational article using <strong>both</strong> sources.</li>
+      <li>You may use the <strong>Notepad</strong> to take notes at any time.</li>
+      <li>You may go back and review your answers before submitting.</li>
+    </ul>
+    <div class="warn-box"><strong>Important:</strong> The 90-minute timer starts when you click "Begin Test." Make sure you are ready.</div>
+    <button class="btn btn-blue btn-big" onclick="startTest()">Begin Test →</button>
+  </div>
+</div>
+
+<!-- ===== PART 1 DIRECTIONS ===== -->
+<div id="s-p1dir" class="screen hidden">
+  <div class="dir-screen">
+    <div class="dir-card">
+      <div class="part-badge p1">PART 1 OF 2</div>
+      <h2 style="color:#003087;margin:0 0 16px;font-size:22px">Reading and Questions</h2>
+      <p style="color:#4a5568;font-size:14px;line-height:1.8;margin-bottom:16px">You will read <strong>two sources</strong> about animals that help people and nature. After reading, answer the <strong>multiple-choice questions</strong>.</p>
+      <p style="color:#4a5568;font-size:14px;line-height:1.8;margin-bottom:24px">You may look back at the sources as often as you like. Choose the <strong>best answer</strong> for each question.</p>
+      <div class="tip-box"><strong>Tip:</strong> Use the Notepad to write down important details as you read.</div>
+      <button class="btn btn-blue" onclick="showScreen('s-qs');loadQuestion(0)">Start Part 1 →</button>
+    </div>
+  </div>
+  <div class="btm"><span></span><span>Part 1 of 2 — Reading &amp; Questions</span><span></span></div>
+</div>
+
+<!-- ===== QUESTIONS ===== -->
+<div id="s-qs" class="screen hidden">
+  <div id="q-nav">
+    <span style="font-size:12px;color:#555;font-weight:600;margin-right:8px">QUESTIONS:</span>
+    <button class="q-dot" id="qd0" onclick="loadQuestion(0)">1</button>
+    <button class="q-dot" id="qd1" onclick="loadQuestion(1)">2</button>
+    <button class="q-dot" id="qd2" onclick="loadQuestion(2)">3</button>
+    <button class="q-dot" id="qd3" onclick="loadQuestion(3)">4</button>
+    <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+      <span id="ans-count" style="font-size:12px;color:#666">0/4 answered</span>
+      <button id="flag-btn" onclick="toggleFlag()" style="background:#fff;border:1px solid #ccc;border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;color:#666">Flag</button>
+    </div>
+  </div>
+  <div id="split">
+    <div id="passage-pane">
+      <div class="p-hdr"><div class="src" id="p-src"></div><div class="ttl" id="p-ttl"></div></div>
+      <div class="p-body" id="p-body"></div>
+    </div>
+    <div id="q-pane">
+      <div class="q-badge" id="q-badge"></div>
+      <div class="q-prompt hidden" id="q-prompt"></div>
+      <div class="q-quote hidden" id="q-quote"></div>
+      <div class="q-stem" id="q-stem"></div>
+      <div class="choices" id="choices"></div>
+    </div>
+  </div>
+  <div class="btm">
+    <button class="btn btn-ghost" id="btn-back" onclick="prevQ()">← Back</button>
+    <span id="q-progress">Part 1 — Question 1 / 4</span>
+    <button class="btn btn-blue" id="btn-next" onclick="nextQ()">Next →</button>
+  </div>
+</div>
+
+<!-- ===== PART 2 DIRECTIONS ===== -->
+<div id="s-p2dir" class="screen hidden">
+  <div class="dir-screen">
+    <div class="dir-card" style="max-width:640px">
+      <div class="part-badge p2">PART 2 OF 2</div>
+      <h2 style="color:#003087;margin:0 0 16px;font-size:22px">Writing Task</h2>
+      <p style="color:#4a5568;font-size:14px;line-height:1.8;margin-bottom:16px">You have read two sources about animals that help people and nature. Now you will write an <strong>informational article</strong> to share what you learned.</p>
+      <div class="prompt-box">
+        <div style="font-weight:800;color:#003087;margin-bottom:10px;font-size:14px">Your Writing Prompt</div>
+        <p style="color:#1a1a2e;font-size:14px;line-height:1.8;margin:0"><strong>Write an informational article explaining how animals help people and the world around them.</strong> Use important details from <strong>BOTH sources</strong> to support your ideas.</p>
+      </div>
+      <div style="font-weight:700;color:#003087;margin-bottom:10px;font-size:13px">Remember to:</div>
+      <ul class="remember-list">
+        <li>Introduce your topic clearly</li>
+        <li>Use facts and details from <strong>both</strong> sources</li>
+        <li>Organize your writing so it is easy to follow</li>
+        <li>Use your own words</li>
+        <li>Write a conclusion that wraps up your ideas</li>
+        <li>Check your spelling, punctuation, and grammar</li>
+      </ul>
+      <button class="btn btn-blue" onclick="showScreen('s-write')">Start Writing →</button>
+    </div>
+  </div>
+  <div class="btm">
+    <button class="btn btn-ghost" onclick="showScreen('s-qs');loadQuestion(currentQ)">← Back to Part 1</button>
+    <span>Part 2 of 2 — Writing Task</span><span></span>
+  </div>
+</div>
+
+<!-- ===== WRITING ===== -->
+<div id="s-write" class="screen hidden">
+  <div id="src-tabs">
+    <button class="src-tab active" id="tab0" onclick="switchTab(0)">Source 1: Guide Dogs</button>
+    <button class="src-tab" id="tab1" onclick="switchTab(1)">Source 2: Bees</button>
+    <span style="margin-left:auto;font-size:11px;color:#777;padding:10px 0;font-style:italic">You may refer to both sources while writing</span>
+  </div>
+  <div id="write-split">
+    <div id="ref-pane">
+      <div class="r-hdr">
+        <div style="font-size:10px;opacity:.75;letter-spacing:1px;text-transform:uppercase" id="ref-src"></div>
+        <div style="font-size:14px;font-weight:700" id="ref-ttl"></div>
+      </div>
+      <div style="padding:18px 20px" id="ref-body"></div>
+    </div>
+    <div id="editor-pane">
+      <div id="prompt-bar"><strong>Prompt:</strong> Write an informational article explaining how animals help people and the world around them. Use details from <strong>both sources</strong>.</div>
+      <div id="toolbar">
+        <span style="font-size:12px;font-weight:600;color:#003087;margin-right:6px">Tools:</span>
+        <button onclick="document.execCommand('undo')">Undo</button>
+        <button onclick="document.execCommand('redo')">Redo</button>
+        <button onclick="document.execCommand('cut')">Cut</button>
+        <button onclick="document.execCommand('copy')">Copy</button>
+        <span id="wc-badge">Word Count: 0</span>
+      </div>
+      <textarea id="essay" placeholder="Begin your informational article here.&#10;&#10;Use details from BOTH sources to explain how animals help people and the world around them.&#10;&#10;• Start with a clear introduction&#10;• Include facts from both sources&#10;• Organize your ideas&#10;• End with a conclusion" oninput="updateWC()"></textarea>
+    </div>
+  </div>
+  <div class="btm">
+    <button class="btn btn-ghost" onclick="showScreen('s-qs');loadQuestion(currentQ)">← Review Part 1</button>
+    <span>Part 2 — Writing Task</span>
+    <button class="btn" id="submit-btn" onclick="submitTest()" style="background:#9ca3af;color:#fff;cursor:default">Submit Test</button>
+  </div>
+</div>
+
+<!-- ===== DONE / REPORT ===== -->
+<div id="s-done" class="screen hidden">
+  <div class="report-wrap">
+    <div class="report-banner">
+      <div>
+        <div style="font-size:11px;opacity:.7;letter-spacing:1.5px;text-transform:uppercase">New Jersey Student Learning Assessment</div>
+        <div style="font-size:20px;font-weight:800">Grade 3 ELA — Score Report</div>
+      </div>
+      <div style="text-align:right;font-size:13px;opacity:.85" id="report-meta"></div>
+    </div>
+    <div class="stat-grid">
+      <div class="stat-card"><div class="slabel">Part 1 (Reading)</div><div class="sval" id="r-mc" style="color:#003087">—</div><div class="ssub">Multiple Choice</div></div>
+      <div class="stat-card"><div class="slabel">Part 2 (Writing)</div><div class="sval" id="r-wr" style="color:#888">—</div><div class="ssub" id="r-wr-sub">Not yet scored</div></div>
+      <div class="stat-card"><div class="slabel">Total Score</div><div class="sval" id="r-tot" style="color:#374151">—</div><div class="ssub">Combined</div></div>
+    </div>
+    <!-- Part 1 review -->
+    <div class="section-card">
+      <div class="section-title">Part 1 — Answer Review</div>
+      <div id="ans-review"></div>
+    </div>
+    <!-- Writing score -->
+    <div class="section-card">
+      <div class="score-section-hdr">
+        <div style="font-weight:700;color:#003087;font-size:15px">Part 2 — Writing Score (NJSLA Rubric)</div>
+        <button class="score-btn" id="score-btn" onclick="scoreEssay()">Score My Writing</button>
+      </div>
+      <div id="score-area"><div class="ready-box">Click "Score My Writing" to receive your NJSLA rubric score.</div></div>
+    </div>
+    <!-- Rubric reference -->
+    <div class="section-card">
+      <div class="section-title">NJSLA Grade 3 Rubric Reference</div>
+      <div class="rubric-ref">
+        <div class="rubric-dim"><div class="rd-title">Organization/Purpose (4 pts)</div><p>4 — Effective: clear intro, body, conclusion; transitions used</p><p>3 — Adequate: intro/conclusion present; some transitions</p><p>2 — Inconsistent: weak intro or conclusion; few transitions</p><p>1 — Minimal: no clear structure; hard to follow</p></div>
+        <div class="rubric-dim"><div class="rd-title">Evidence/Elaboration (4 pts)</div><p>4 — Thorough: both sources; accurate; elaborated; vocabulary</p><p>3 — Adequate: both sources; mostly accurate; some elaboration</p><p>2 — Partial: may use one source; limited elaboration</p><p>1 — Minimal: little evidence; inaccurate; no elaboration</p></div>
+        <div class="rubric-dim"><div class="rd-title">Conventions (2 pts)</div><p>2 — Few/no errors; grade-level control</p><p>1 — Some errors; meaning still clear</p><p>0 — Many errors; meaning is unclear</p></div>
+      </div>
+    </div>
+    <div class="retake-wrap">
+      <button class="btn btn-blue" onclick="retake()" style="padding:13px 36px;font-size:15px;border-radius:10px">Retake Practice Test</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════ DATA ═══════════════
+const passages = [
+  {
+    source:"Source 1", title:"Guide Dogs: Helpers with Four Paws",
+    body:[
+      "Have you ever seen a dog wearing a special harness walking beside a person? That dog might be a guide dog. Guide dogs are specially trained to help people who are blind or have trouble seeing. They help their owners move safely through the world.",
+      "Guide dogs go through many months of careful training. Trainers teach the dogs to walk in a straight line, stop at curbs, and avoid objects that might be in the way. The dogs learn to watch for danger, like cars and bicycles. They also learn to find important places, like doors and stairs.",
+      "When a guide dog is matched with a person, both the dog and the owner learn to work together as a team. The owner gives directions by speaking commands. The dog follows the commands, but will also make its own decisions when danger is nearby.",
+      "Guide dogs make a big difference in the lives of their owners. With a guide dog, many people who are blind can travel to work, go shopping, and visit friends on their own. The dogs give their owners freedom and confidence to live full lives.",
+      "Guide dogs are working animals, not pets. When a guide dog is wearing its harness, it is on the job. People should not pet or distract a guide dog that is working, because the dog needs to focus on keeping its owner safe."
+    ]
+  },
+  {
+    source:"Source 2", title:"Bees: Small but Mighty Helpers",
+    body:[
+      "Bees are some of the hardest workers in nature. These small insects do a very important job called pollination. Without bees, many of the fruits and vegetables we eat would not exist.",
+      "Pollination happens when bees fly from flower to flower looking for food called nectar. As a bee drinks nectar, tiny grains of pollen stick to its fuzzy body. When the bee flies to the next flower, some pollen rubs off. This helps plants make seeds, which grow into new plants and fruits.",
+      "Farmers depend on bees to help their crops grow. Apple trees, strawberry plants, and almond trees all need bees to make fruit. In fact, about one third of the food people eat depends on bees and other pollinators.",
+      "Bees also make honey, which people have eaten for thousands of years. A single hive of bees can make up to 100 pounds of honey in one year. Honey does not spoil, so it can be stored for a very long time.",
+      "Today, bees are in danger because of chemicals used on farms and the loss of wild plants and flowers. Scientists and farmers are working hard to protect bees. Planting flowers, avoiding harmful chemicals, and setting up beehives are all ways people help bees so that bees can keep helping us."
+    ]
+  }
+];
+
+const questions = [
+  { pi:0, prompt:'Read this sentence from "Guide Dogs: Helpers with Four Paws."', quote:'"Guide dogs are working animals, not pets."',
+    stem:"Which detail from the passage BEST supports this statement?",
+    choices:["Guide dogs go through many months of careful training.","When a guide dog is wearing its harness, it is on the job and should not be petted or distracted.","The dogs give their owners freedom and confidence to live full lives.","Trainers teach the dogs to walk in a straight line and stop at curbs."], correct:1 },
+  { pi:0, stem:"What does a guide dog do when there is danger nearby, even if the owner has given a different command?",
+    choices:["It stops and waits for a new command.","It barks to alert people nearby.","It makes its own decision to keep the owner safe.","It returns to its trainer for help."], correct:2 },
+  { pi:1, stem:'What is the MAIN idea of "Bees: Small but Mighty Helpers"?',
+    choices:["Bees make large amounts of honey that people enjoy eating.","Bees do important work that helps plants grow and provides food for people.","Farmers use chemicals that are dangerous to bees and other insects.","Bees live in hives and travel long distances to find flowers."], correct:1 },
+  { pi:1, stem:"According to the passage, why are bees in danger today?",
+    choices:["Farmers are building too many beehives near crops.","Bees are being replaced by other types of pollinators.","Chemicals used on farms and the loss of wild plants are hurting bees.","Honey production is causing bees to work too hard."], correct:2 }
+];
+
+// ═══════════════ STATE ═══════════════
+let timeLeft = 90*60, timerID = null;
+let currentQ = 0, answers = {}, flagged = {};
+let scoreData = null, scored = false;
+const LETTERS = ['A','B','C','D'];
+
+// ═══════════════ TIMER ═══════════════
+function startTimer(){
+  timerID = setInterval(()=>{
+    timeLeft--;
+    updateTimerDisplay();
+    if(timeLeft<=0){ clearInterval(timerID); submitTest(); }
+  },1000);
+}
+function updateTimerDisplay(){
+  const m=String(Math.floor(timeLeft/60)).padStart(2,'0');
+  const s=String(timeLeft%60).padStart(2,'0');
+  const t=document.getElementById('timer');
+  t.textContent=m+':'+s;
+  t.className=timeLeft<=600?'warn':'';
+}
+
+// ═══════════════ SCREENS ═══════════════
+function showScreen(id){
+  ['s-welcome','s-p1dir','s-qs','s-p2dir','s-write','s-done'].forEach(s=>{
+    document.getElementById(s).classList.toggle('hidden', s!==id);
+  });
+  const hdr=document.getElementById('header');
+  hdr.classList.toggle('hidden', id==='s-welcome');
+}
+function startTest(){
+  showScreen('s-p1dir');
+  startTimer();
+}
+
+// ═══════════════ QUESTIONS ═══════════════
+function loadQuestion(i){
+  currentQ=i;
+  const q=questions[i], p=passages[q.pi];
+  // passage
+  document.getElementById('p-src').textContent=p.source;
+  document.getElementById('p-ttl').textContent=p.title;
+  const pb=document.getElementById('p-body');
+  pb.innerHTML=p.body.map(t=>`<p>${t}</p>`).join('');
+  // question
+  document.getElementById('q-badge').textContent=`Question ${i+1} of ${questions.length}`;
+  document.getElementById('q-progress').textContent=`Part 1 — Question ${i+1} / ${questions.length}`;
+  const qprompt=document.getElementById('q-prompt');
+  const qquote=document.getElementById('q-quote');
+  if(q.prompt){ qprompt.textContent=q.prompt; qprompt.classList.remove('hidden'); } else { qprompt.classList.add('hidden'); }
+  if(q.quote){ qquote.textContent=q.quote; qquote.classList.remove('hidden'); } else { qquote.classList.add('hidden'); }
+  document.getElementById('q-stem').textContent=q.stem;
+  // choices
+  const cc=document.getElementById('choices');
+  cc.innerHTML=q.choices.map((ch,ci)=>{
+    const sel=answers[i]===ci;
+    return `<button class="choice${sel?' selected':''}" onclick="selectAnswer(${i},${ci})">
+      <div class="letter">${LETTERS[ci]}</div>
+      <div class="txt">${ch}</div>
+    </button>`;
+  }).join('');
+  // nav buttons
+  document.getElementById('btn-back').style.opacity=i===0?'0.4':'1';
+  document.getElementById('btn-back').style.cursor=i===0?'default':'pointer';
+  const nb=document.getElementById('btn-next');
+  if(i===questions.length-1){
+    nb.textContent='Go to Part 2 →';
+    nb.className='btn btn-green';
+    nb.onclick=()=>showScreen('s-p2dir');
+  } else {
+    nb.textContent='Next →';
+    nb.className='btn btn-blue';
+    nb.onclick=nextQ;
+  }
+  // flag button
+  const fb=document.getElementById('flag-btn');
+  fb.textContent=flagged[i]?'! Flagged':'Flag';
+  fb.style.color=flagged[i]?'#dc2626':'#666';
+  fb.style.borderColor=flagged[i]?'#dc2626':'#ccc';
+  // dots
+  questions.forEach((_,j)=>{
+    const d=document.getElementById('qd'+j);
+    d.className='q-dot'+(j===i?' active':answers[j]!==undefined?' answered':'')+(flagged[j]?' flagged':'');
+  });
+  updateAnsCount();
+}
+function selectAnswer(qi,ci){
+  answers[qi]=ci;
+  loadQuestion(qi);
+}
+function toggleFlag(){
+  flagged[currentQ]=!flagged[currentQ];
+  loadQuestion(currentQ);
+}
+function prevQ(){ if(currentQ>0) loadQuestion(currentQ-1); }
+function nextQ(){ if(currentQ<questions.length-1) loadQuestion(currentQ+1); }
+function updateAnsCount(){
+  document.getElementById('ans-count').textContent=Object.keys(answers).length+'/'+questions.length+' answered';
+}
+
+// ═══════════════ WRITING ═══════════════
+let currentTab=0;
+function switchTab(i){
+  currentTab=i;
+  document.getElementById('tab0').className='src-tab'+(i===0?' active':'');
+  document.getElementById('tab1').className='src-tab'+(i===1?' active':'');
+  loadRef(i);
+}
+function loadRef(i){
+  const p=passages[i];
+  document.getElementById('ref-src').textContent=p.source+' — Reference';
+  document.getElementById('ref-ttl').textContent=p.title;
+  document.getElementById('ref-body').innerHTML=p.body.map(t=>`<p style="font-size:14px;line-height:1.85;color:#1a1a2e;margin-bottom:14px">${t}</p>`).join('');
+}
+function updateWC(){
+  const txt=document.getElementById('essay').value.trim();
+  const wc=txt?txt.split(/\s+/).length:0;
+  const badge=document.getElementById('wc-badge');
+  badge.textContent='Word Count: '+wc;
+  badge.className=wc>=50?'good':'';
+  const sb=document.getElementById('submit-btn');
+  if(txt.length>20){ sb.className='btn btn-green'; sb.style.cursor='pointer'; }
+  else { sb.style.background='#9ca3af'; sb.style.cursor='default'; }
+}
+
+// ═══════════════ SUBMIT ═══════════════
+function submitTest(){
+  clearInterval(timerID);
+  showScreen('s-done');
+  buildReport();
+}
+function buildReport(){
+  const used=90*60-timeLeft;
+  const um=Math.floor(used/60), us=used%60;
+  const essay=document.getElementById('essay').value.trim();
+  const wc=essay?essay.split(/\s+/).length:0;
+  document.getElementById('report-meta').innerHTML=`<div>Time used: ${um}m ${us}s</div><div>Words written: ${wc}</div>`;
+  // MC score
+  const mcScore=Object.entries(answers).filter(([qi,v])=>questions[+qi].correct===v).length;
+  document.getElementById('r-mc').textContent=mcScore+' / '+questions.length;
+  document.getElementById('r-mc').style.color='#003087';
+  document.getElementById('r-tot').textContent='—';
+  // Part 1 review
+  const ar=document.getElementById('ans-review');
+  ar.innerHTML=questions.map((q,i)=>{
+    const chosen=answers[i];
+    const right=chosen===q.correct;
+    const cls=chosen===undefined?'blank':right?'correct':'wrong';
+    const icon=chosen===undefined?'—':right?'✓':'✗';
+    return `<div class="ans-row ${cls}">
+      <div class="ans-num">${i+1}</div>
+      <div style="flex:1">
+        <div style="font-size:13px;color:#374151;line-height:1.4;margin-bottom:4px">${q.stem}</div>
+        <div style="display:flex;gap:16px;font-size:12px">
+          <span style="color:#555">Your answer: <strong style="color:${right?'#166534':'#dc2626'}">${chosen!==undefined?LETTERS[chosen]:'Not answered'}</strong></span>
+          ${!right&&chosen!==undefined?`<span style="color:#166534">Correct: <strong>${LETTERS[q.correct]}</strong></span>`:''}
+        </div>
+      </div>
+      <span style="font-size:18px;flex-shrink:0">${icon}</span>
+    </div>`;
+  }).join('');
+  if(!essay){ document.getElementById('score-btn').style.display='none'; document.getElementById('score-area').innerHTML='<div class="no-essay">No essay was submitted for Part 2.</div>'; }
+}
+
+// ═══════════════ AI SCORING ═══════════════
+async function scoreEssay(){
+  const essay=document.getElementById('essay').value.trim();
+  if(!essay) return;
+  document.getElementById('score-btn').style.display='none';
+  document.getElementById('score-area').innerHTML=`
+    <div class="scoring-loading">
+      <div style="font-size:13px;color:#003087;font-weight:600;margin-bottom:8px">Scoring your writing against the NJSLA rubric...</div>
+      <div style="font-size:12px;color:#888">Checking Organization, Evidence, and Conventions</div>
+      <div class="loading-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+    </div>`;
+  const prompt=`You are an official NJSLA scorer for Grade 3 Research Simulation Task writing.
+
+RUBRIC:
+Organization/Purpose (0-4): 4=effective intro+body+conclusion+transitions; 3=adequate structure; 2=inconsistent; 1=minimal; 0=none
+Evidence/Elaboration (0-4): 4=thorough evidence from BOTH sources+elaboration+vocabulary; 3=adequate both sources; 2=partial/one source; 1=minimal; 0=none
+Conventions (0-2): 2=few/no errors; 1=some errors; 0=many errors interfering with meaning
+
+Context: Grade 3 student (age 8-9). Prompt: "Write an informational article explaining how animals help people and the world around them using details from BOTH sources." Source 1=guide dogs helping blind people. Source 2=bees and pollination.
+
+ESSAY: """${essay}"""
+
+Return ONLY valid JSON, no markdown:
+{"org_score":0,"org_feedback":"","evidence_score":0,"evidence_feedback":"","conventions_score":0,"conventions_feedback":"","strengths":["",""],"grow":["",""],"overall":""}`;
+  try{
+    const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:900,messages:[{role:"user",content:prompt}]})});
+    const data=await res.json();
+    const raw=data.content?.find(b=>b.type==="text")?.text||"";
+    scoreData=JSON.parse(raw.replace(/```json|```/g,"").trim());
+    renderScore(scoreData);
+  } catch(e){
+    document.getElementById('score-area').innerHTML=`<div class="err-box">Scoring could not be completed. <button onclick="document.getElementById('score-btn').style.display='';document.getElementById('score-area').innerHTML='<div class=ready-box>Click Score My Writing above.</div>'" style="background:none;border:none;color:#dc2626;font-weight:700;cursor:pointer;text-decoration:underline">Try again</button></div>`;
+    document.getElementById('score-btn').style.display='';
+  }
+}
+
+function renderScore(d){
+  const total=d.org_score+d.evidence_score+d.conventions_score;
+  const mcScore=Object.entries(answers).filter(([qi,v])=>questions[+qi].correct===v).length;
+  const essay=document.getElementById('essay').value.trim();
+  const wc=essay?essay.split(/\s+/).length:0;
+  // level
+  let lvl;
+  if(total>=9) lvl={label:"Advanced",color:"#166534",bg:"#f0fdf4",border:"#86efac"};
+  else if(total>=7) lvl={label:"Proficient",color:"#1d4ed8",bg:"#eff6ff",border:"#93c5fd"};
+  else if(total>=5) lvl={label:"Approaching Proficient",color:"#d97706",bg:"#fffbeb",border:"#fcd34d"};
+  else lvl={label:"Needs Improvement",color:"#dc2626",bg:"#fff1f2",border:"#fca5a5"};
+  // update summary cards
+  document.getElementById('r-wr').textContent=total+' / 10';
+  document.getElementById('r-wr').style.color=lvl.color;
+  document.getElementById('r-wr-sub').textContent=lvl.label;
+  document.getElementById('r-tot').textContent=(mcScore+total)+' / '+(questions.length+10);
+  // dims
+  const dims=[
+    {label:"Organization & Purpose",score:d.org_score,max:4,fb:d.org_feedback,color:"#1d4ed8"},
+    {label:"Evidence & Elaboration",score:d.evidence_score,max:4,fb:d.evidence_feedback,color:"#7c3aed"},
+    {label:"Conventions",score:d.conventions_score,max:2,fb:d.conventions_feedback,color:"#0891b2"}
+  ];
+  const dimsHTML=dims.map(dim=>`
+    <div class="dim-card">
+      <div class="dim-hdr">
+        <div style="font-weight:700;color:#1e293b;font-size:14px">${dim.label}</div>
+        <span class="dim-score-badge" style="background:${dim.color}">${dim.score} / ${dim.max}</span>
+      </div>
+      <div class="score-bar-wrap">
+        <div class="score-bar-bg"><div class="score-bar-fill" style="width:${Math.round(dim.score/dim.max*100)}%;background:${dim.color}"></div></div>
+        <span style="font-weight:800;font-size:14px;color:${dim.color};min-width:36px;text-align:right">${dim.score}/${dim.max}</span>
+      </div>
+      <div class="dim-fb">${dim.fb}</div>
+    </div>`).join('');
+  document.getElementById('score-area').innerHTML=`
+    <div class="level-badge" style="background:${lvl.bg};border-color:${lvl.border}">
+      <div><div style="font-size:11px;color:${lvl.color};font-weight:700;letter-spacing:1px;text-transform:uppercase">Performance Level</div>
+      <div style="font-size:20px;font-weight:900;color:${lvl.color}">${lvl.label}</div></div>
+      <div style="text-align:center"><div style="font-size:32px;font-weight:900;color:${lvl.color};line-height:1">${total}</div><div style="font-size:11px;color:${lvl.color};opacity:.8">out of 10</div></div>
+    </div>
+    ${dimsHTML}
+    <div class="sg-grid">
+      <div class="sg-card" style="background:#f0fdf4;border-color:#86efac">
+        <div class="sg-title" style="color:#166534">Strengths</div>
+        ${d.strengths.map(s=>`<div class="sg-item" style="color:#166534"><span>+</span><span>${s}</span></div>`).join('')}
+      </div>
+      <div class="sg-card" style="background:#fffbeb;border-color:#fcd34d">
+        <div class="sg-title" style="color:#92400e">Areas to Grow</div>
+        ${d.grow.map(g=>`<div class="sg-item" style="color:#78350f"><span>→</span><span>${g}</span></div>`).join('')}
+      </div>
+    </div>
+    <div class="overall-card">
+      <div style="font-weight:700;color:#1d4ed8;font-size:13px;margin-bottom:6px">Scorer's Comments</div>
+      <p style="font-size:13px;color:#1e3a8a;line-height:1.65;margin:0">${d.overall}</p>
+    </div>`;
+}
+
+// ═══════════════ NOTEPAD ═══════════════
+function toggleNotepad(){
+  const np=document.getElementById('notepad');
+  const btn=document.getElementById('notepad-btn');
+  const hidden=np.classList.toggle('hidden');
+  btn.classList.toggle('active',!hidden);
+}
+
+// ═══════════════ RETAKE ═══════════════
+function retake(){
+  clearInterval(timerID);
+  timeLeft=90*60; answers={}; flagged={}; scoreData=null; currentQ=0;
+  document.getElementById('essay').value='';
+  document.getElementById('notepad-text').value='';
+  document.getElementById('wc-badge').textContent='Word Count: 0';
+  document.getElementById('submit-btn').style.background='#9ca3af';
+  document.getElementById('score-btn').style.display='';
+  updateTimerDisplay();
+  showScreen('s-welcome');
+}
+
+// ═══════════════ INIT ═══════════════
+loadRef(0);
+updateTimerDisplay();
+</script>
+</body>
+</html>
